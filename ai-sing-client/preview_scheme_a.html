@@ -971,32 +971,43 @@
     /* ----------------------------------------------------
        1. 左区: 歌曲信息 + 紧随其后的竖排模式选择 (普通模式 / 机架模式)
        ---------------------------------------------------- */
+    /* ----------------------------------------------------
+       1. 左区: 歌曲信息 (歌名、机架麦克风状态) + 原曲/改词按钮及下方时间
+       ---------------------------------------------------- */
     .dock-left-meta-pane {
       display: flex;
       align-items: center;
-      gap: 12px;
-      min-width: 260px;
-      max-width: 380px;
+      gap: 16px;
+      min-width: 310px;
+      max-width: 440px;
       flex-shrink: 0;
     }
 
-    /* 歌曲封面与曲目信息 */
+    /* 歌曲封面与曲目信息整行容器 */
     .dock-track-sub-row {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 18px;
       overflow: hidden;
     }
+
+    /* 左模块: 封面 + 歌名 + 机架麦克风状态 */
+    .dock-track-info-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
     .track-cover-mini {
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       border-radius: 8px;
       background: linear-gradient(135deg, #1b2438, #0e1322);
       border: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 19px;
       color: var(--glow-primary);
       flex-shrink: 0;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
@@ -1004,28 +1015,19 @@
     .track-meta-wrap {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 4px;
+      justify-content: center;
       overflow: hidden;
     }
-    .track-title-time {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
     .track-title {
-      font-size: 14px;
+      font-size: 14.5px;
       font-weight: 800;
       color: #fff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 180px;
-    }
-    .track-time {
-      font-size: 11px;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--text-muted);
-      flex-shrink: 0;
+      max-width: 170px;
+      line-height: 1.2;
     }
     .track-mic-status {
       font-size: 11px;
@@ -1034,6 +1036,8 @@
       align-items: center;
       gap: 5px;
       font-family: 'JetBrains Mono', monospace;
+      line-height: 1.2;
+      white-space: nowrap;
     }
     .mic-led-indicator {
       width: 6px;
@@ -1041,6 +1045,24 @@
       border-radius: 50%;
       background: var(--glow-success);
       box-shadow: 0 0 6px var(--glow-success);
+    }
+
+    /* 右模块: 原曲、改词按钮 + 时间放按钮下面 */
+    .dock-alt-time-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+      flex-shrink: 0;
+      justify-content: center;
+    }
+    .track-time {
+      font-size: 11.5px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      letter-spacing: 0.3px;
+      padding-left: 2px;
+      line-height: 1.1;
     }
 
     /* 模式提示标签 (随模式实时切换) */
@@ -2668,6 +2690,66 @@
       box-shadow: 0 1px 6px rgba(0, 242, 254, 0.25);
     }
 
+    /* 首页音乐搜索卡片中的自定义源指示条 (纯自定义源，无6大平台) */
+    .search-custom-source-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba(0, 242, 254, 0.07);
+      border: 1px solid rgba(0, 242, 254, 0.22);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .search-custom-source-row:hover {
+      background: rgba(0, 242, 254, 0.14);
+      border-color: var(--glow-primary);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+    }
+
+    /* 自定义源专属通道条 (弹窗内) */
+    .lx-custom-channel-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: rgba(0, 242, 254, 0.06);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+    }
+    .lx-channel-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .channel-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--glow-success);
+      box-shadow: 0 0 8px var(--glow-success);
+    }
+    .channel-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .channel-ping {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--glow-success);
+    }
+    .lx-channel-badge {
+      font-size: 10px;
+      padding: 1.5px 7px;
+      border-radius: 4px;
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      color: var(--glow-primary);
+      font-weight: 600;
+    }
+
     /* 洛雪全网搜索与一键训练弹窗 */
     .lx-studio-dialog {
       width: 900px;
@@ -3232,29 +3314,28 @@
               </div>
             </div>
 
-            <!-- 音乐搜索模块 (集成洛雪音乐全网音源、自定义源与一键训练) -->
+            <!-- 音乐搜索模块 (仅支持自定义源与一键训练) -->
             <div class="music-search-placeholder-card" id="musicSearchCard">
               <div class="card-head-row">
                 <div class="card-title-group">
                   <span class="card-icon">🔍</span>
                   <span class="card-title">音乐搜索</span>
-                  <span class="lx-badge">洛雪源</span>
+                  <span class="lx-badge">自定义源</span>
                 </div>
                 <span class="card-badge-clickable" onclick="openLxCustomSourceModal()" id="cardLxSourceState" title="点击管理自定义音源脚本">⚙️ 六音源 (正常)</span>
               </div>
 
-              <!-- 洛雪音源平台快速切换 -->
-              <div class="search-platform-tabs">
-                <span class="platform-tab-chip active" onclick="switchSearchPlatform('all', this)">聚合</span>
-                <span class="platform-tab-chip" onclick="switchSearchPlatform('tx', this)">企鹅</span>
-                <span class="platform-tab-chip" onclick="switchSearchPlatform('kg', this)">酷狗</span>
-                <span class="platform-tab-chip" onclick="switchSearchPlatform('wy', this)">网易</span>
-                <span class="platform-tab-chip" onclick="switchSearchPlatform('kw', this)">酷我</span>
-                <span class="platform-tab-chip" onclick="switchSearchPlatform('mg', this)">咪咕</span>
+              <!-- 自定义源专属通道状态指示 (取消6大平台，仅支持自定义源) -->
+              <div class="search-custom-source-row" onclick="openLxCustomSourceModal()" title="点击切换或配置自定义源脚本">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="mic-led-indicator" style="width:6px; height:6px;"></span>
+                  <span style="font-size:11px; color:#fff;" id="cardActiveSourceName">六音自定义源 · v1.2.0</span>
+                </div>
+                <span style="font-size:10.5px; color:var(--glow-primary); font-family:'JetBrains Mono', monospace;" id="cardActiveSourcePing">28ms ⚙️ 管理</span>
               </div>
 
               <div class="music-search-box">
-                <input type="text" class="music-search-input" id="cloudMusicSearchInput" placeholder="输入歌名/歌手全网检索..." onkeydown="if(event.key==='Enter') doCloudMusicSearch()">
+                <input type="text" class="music-search-input" id="cloudMusicSearchInput" placeholder="输入歌名/歌手，走自定义源检索..." onkeydown="if(event.key==='Enter') doCloudMusicSearch()">
                 <button class="music-search-btn" onclick="doCloudMusicSearch()">搜索</button>
               </div>
               <div class="search-quick-tags">
@@ -3263,8 +3344,8 @@
                 <span class="quick-tag" onclick="quickFillSearch('孤勇者')">孤勇者</span>
                 <span class="quick-tag" onclick="quickFillSearch('大鱼')">大鱼</span>
               </div>
-              <div class="search-hint-box" onclick="openLxMusicStudio()" style="cursor: pointer;" title="点击展开洛雪全网搜索与一键训练中心">
-                <span>⚡ 洛雪音源已就绪 · 支持无损下载与一键训练 ❯</span>
+              <div class="search-hint-box" onclick="openLxMusicStudio()" style="cursor: pointer;" title="点击展开自定义源全屏检索与一键训练">
+                <span>⚡ 自定义源通道就绪 · 支持无损解析与一键训练 ❯</span>
               </div>
             </div>
           </div>
@@ -3431,30 +3512,35 @@
               <!-- 下层主控行 -->
               <div class="dock-controls-row">
                 
-                <!-- 1. 左区: 歌曲信息 (位置固定，不受歌名长度挤压) -->
+                <!-- 1. 左区: 歌曲信息 (歌名、机架麦克风状态) + 原曲/改词按钮及下方时间 -->
                 <div class="dock-left-meta-pane">
                   <div class="dock-track-sub-row">
-                    <div class="track-cover-mini" id="dockCoverSquare">
-                      <span>🎵</span>
-                    </div>
-                    <div class="track-meta-wrap">
-                      <div class="track-title-time">
+                    <!-- 左侧：封面、歌名、机架麦克风状态 -->
+                    <div class="dock-track-info-group">
+                      <div class="track-cover-mini" id="dockCoverSquare">
+                        <span>🎵</span>
+                      </div>
+                      <div class="track-meta-wrap">
                         <span class="track-title" id="dockSongTitle" title="爱的代价">爱的代价</span>
-                        <div class="dock-alt-control-group">
-                          <button class="dock-alt-toggle-btn" id="dockAltTrackBtn" onclick="toggleAltLyricsTrack()" title="点击切换：原曲轨 ⇄ AI 改词分轨">
-                            <span class="alt-glow-dot"></span>
-                            <span id="dockAltTrackText">原曲轨</span>
-                          </button>
-                          <button class="dock-alt-open-btn" onclick="openAltLyricsStudio(activeSongName)" title="打开 AI 智能改词工坊">
-                            <span>✍️ 改词</span>
-                          </button>
+                        <div class="track-mic-status" id="dockMicStatus">
+                          <span class="mic-led-indicator" id="micLed"></span>
+                          <span id="micReadoutText">机架麦克风输入 0.005</span>
                         </div>
-                        <span class="track-time" id="dockTimeLabel">02:39 / 03:28</span>
                       </div>
-                      <div class="track-mic-status" id="dockMicStatus">
-                        <span class="mic-led-indicator" id="micLed"></span>
-                        <span id="micReadoutText">机架麦克风输入 0.005</span>
+                    </div>
+
+                    <!-- 右侧：原曲、改词按钮，时间放按钮下面 -->
+                    <div class="dock-alt-time-group">
+                      <div class="dock-alt-control-group">
+                        <button class="dock-alt-toggle-btn" id="dockAltTrackBtn" onclick="toggleAltLyricsTrack()" title="点击切换：原曲轨 ⇄ AI 改词分轨">
+                          <span class="alt-glow-dot"></span>
+                          <span id="dockAltTrackText">原曲轨</span>
+                        </button>
+                        <button class="dock-alt-open-btn" onclick="openAltLyricsStudio(activeSongName)" title="打开 AI 智能改词工坊">
+                          <span>✍️ 改词</span>
+                        </button>
                       </div>
+                      <span class="track-time" id="dockTimeLabel">02:39 / 03:28</span>
                     </div>
                   </div>
                 </div>
@@ -3923,10 +4009,10 @@
           <span class="lx-brand-icon">⚡</span>
           <div>
             <div style="display:flex; align-items:center; gap:8px;">
-              <span class="lx-studio-title">洛雪全网音乐搜索 & 一键训练中心</span>
-              <span class="lx-badge" style="background:rgba(0,242,254,0.15); color:var(--glow-primary); border:1px solid rgba(0,242,254,0.3); font-size:10px; padding:2px 6px; border-radius:4px;">LX v2.0 内核</span>
+              <span class="lx-studio-title">自定义源音乐搜索 & 一键训练中心</span>
+              <span class="lx-badge" style="background:rgba(0,242,254,0.15); color:var(--glow-primary); border:1px solid rgba(0,242,254,0.3); font-size:10px; padding:2px 6px; border-radius:4px;">仅走自定义源脚本</span>
             </div>
-            <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">集成六音音源 · 支持全平台无损解析 · 伴奏/干声一键切片与模型训练</div>
+            <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">严格基于自定义源脚本接口 (*.js) · 支持全平台无损解析 · 伴奏/干声一键切片与模型训练</div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
@@ -3935,24 +4021,26 @@
         </div>
       </div>
 
-      <!-- 搜索栏与平台过滤 -->
+      <!-- 搜索栏与自定义源专属通道 (取消六大平台，仅走自定义源) -->
       <div class="lx-search-toolbar">
         <div class="lx-search-box-large">
-          <input type="text" class="lx-search-input" id="lxStudioSearchInput" placeholder="输入歌曲名、歌手、歌单或专辑，全网检索..." onkeydown="if(event.key==='Enter') doLxStudioSearch()">
+          <input type="text" class="lx-search-input" id="lxStudioSearchInput" placeholder="输入歌曲名、歌手，通过当前自定义源检索..." onkeydown="if(event.key==='Enter') doLxStudioSearch()">
           <button class="lx-search-submit-btn" onclick="doLxStudioSearch()">
-            <span>🔍 全网检索</span>
+            <span>🔍 自定义源检索</span>
           </button>
         </div>
-        <div class="lx-platform-filter-row">
-          <span style="font-size:11px; color:var(--text-dim); margin-right:4px;">音源平台：</span>
-          <span class="platform-tab-chip active" id="chipLx_all" onclick="filterLxPlatform('all', this)">🌐 聚合搜索</span>
-          <span class="platform-tab-chip" id="chipLx_tx" onclick="filterLxPlatform('tx', this)">🐧 企鹅音乐</span>
-          <span class="platform-tab-chip" id="chipLx_kg" onclick="filterLxPlatform('kg', this)">🐶 酷狗音乐</span>
-          <span class="platform-tab-chip" id="chipLx_wy" onclick="filterLxPlatform('wy', this)">☁️ 网易云</span>
-          <span class="platform-tab-chip" id="chipLx_kw" onclick="filterLxPlatform('kw', this)">⭐ 酷我音乐</span>
-          <span class="platform-tab-chip" id="chipLx_mg" onclick="filterLxPlatform('mg', this)">🎵 咪咕音乐</span>
-          <span style="flex:1;"></span>
-          <span style="font-size:11px; color:var(--glow-success);" id="lxSourceStatusNotice">● 六音自定义源已激活 (28ms)</span>
+        <!-- 自定义源专属通道条 -->
+        <div class="lx-custom-channel-bar">
+          <div class="lx-channel-left">
+            <span class="channel-dot"></span>
+            <span style="font-size:11.5px; color:var(--text-dim);">当前检索通道：</span>
+            <span class="channel-name" id="lxStudioChannelName">六音自定义源 · v1.2.0 (全解析)</span>
+            <span class="channel-ping" id="lxStudioChannelPing">28ms 极佳</span>
+            <span class="lx-channel-badge">仅支持自定义源通道</span>
+          </div>
+          <div class="lx-channel-right">
+            <button class="top-action-btn" style="height:26px; padding:0 10px; font-size:11px;" onclick="openLxCustomSourceModal()">⚙️ 切换 / 导入自定义源</button>
+          </div>
         </div>
       </div>
 
@@ -4737,26 +4825,24 @@
     });
 
     // ========================================================
-    // 洛雪音乐 (LX Music Desktop) 全网搜索、自定义源与一键训练引擎
+    // 洛雪自定义源 (LX Music Desktop Custom Source API) 检索与训练引擎
+    // 取消集成 企鹅/酷狗/网易/酷我/咪咕/聚合 6大平台，全面纯走自定义源脚本
     // ========================================================
-    let currentSearchPlatform = 'all'; // 'all', 'tx', 'kg', 'wy', 'kw', 'mg'
     let currentLxSource = 'sixin'; // 'sixin', 'ikun', 'local'
     let lxCustomSources = {
-      'sixin': { name: '六音自定义源 (内置推荐) · v1.2.0', ping: 28, status: '正常', desc: '全平台企鹅/网易/酷狗/酷我/咪咕 FLAC 无损解析' },
-      'ikun': { name: '爱坤镜像备用音源 · v2.4.1', ping: 45, status: '正常', desc: '高可用多节点备份源 · 专攻无损音乐抓取与逐字歌词提取' },
-      'local': { name: '本地开发者自定义脚本 (*.js / Node.js)', ping: 0, status: '本地', desc: '自定义编写解析规则，直接运行本地 JavaScript 脚本' }
+      'sixin': { name: '六音自定义源 (内置推荐) · v1.2.0', short: '六音源', ping: 28, status: '正常', desc: '全解析 FLAC 无损音频与逐字 LRC 动态歌词脚本' },
+      'ikun': { name: '爱坤镜像备用音源 · v2.4.1', short: '爱坤源', ping: 45, status: '正常', desc: '高可用多节点备份源 · 专攻无损音乐抓取与逐字歌词提取' },
+      'local': { name: '本地开发者自定义脚本 (*.js / Node.js)', short: '本地脚本', ping: 0, status: '本地', desc: '自定义编写解析规则，直接运行本地 JavaScript 脚本' }
     };
 
-    // 预置洛雪音乐多平台搜索模拟数据库 (包含歌曲、歌手、专辑、音质、平台、歌词与时长)
-    const lxMockSongs = [
+    // 基于自定义源的曲目数据源 (支持 FLAC/Hi-Res 无损母带及逐字歌词)
+    const lxCustomSourceSongs = [
       {
         id: 'lx_01',
         title: '晴天',
         artist: '周杰伦',
         album: '叶惠美',
         duration: '04:29',
-        platform: 'tx',
-        platformName: '企鹅音乐',
         qualities: ['FLAC 无损', '320K', '128K'],
         sampleRate: '48kHz / 24bit',
         hasLyrics: true
@@ -4767,8 +4853,6 @@
         artist: '买辣椒也用券',
         album: '起风了 (Single)',
         duration: '05:25',
-        platform: 'wy',
-        platformName: '网易云音乐',
         qualities: ['Hi-Res 无损', 'FLAC', '320K'],
         sampleRate: '96kHz / 24bit',
         hasLyrics: true
@@ -4779,8 +4863,6 @@
         artist: '陈奕迅',
         album: '英雄联盟：双城之战',
         duration: '04:16',
-        platform: 'kg',
-        platformName: '酷狗音乐',
         qualities: ['FLAC 无损', '320K'],
         sampleRate: '48kHz / 16bit',
         hasLyrics: true
@@ -4791,8 +4873,6 @@
         artist: '周深',
         album: '大鱼海棠 电影原声带',
         duration: '05:13',
-        platform: 'kw',
-        platformName: '酷我音乐',
         qualities: ['FLAC 无损', '320K'],
         sampleRate: '48kHz / 24bit',
         hasLyrics: true
@@ -4803,8 +4883,6 @@
         artist: '李宗盛',
         album: '李宗盛作品精选',
         duration: '04:32',
-        platform: 'tx',
-        platformName: '企鹅音乐',
         qualities: ['FLAC 无损', '320K'],
         sampleRate: '48kHz / 16bit',
         hasLyrics: true
@@ -4815,8 +4893,6 @@
         artist: '刘若英',
         album: '我等你',
         duration: '05:41',
-        platform: 'mg',
-        platformName: '咪咕音乐',
         qualities: ['FLAC 无损', '320K'],
         sampleRate: '48kHz / 16bit',
         hasLyrics: true
@@ -4827,8 +4903,6 @@
         artist: '李荣浩',
         album: '纵横四海',
         duration: '03:30',
-        platform: 'tx',
-        platformName: '企鹅音乐',
         qualities: ['FLAC 无损', '320K'],
         sampleRate: '48kHz / 24bit',
         hasLyrics: true
@@ -4839,26 +4913,15 @@
         artist: 'G.E.M. 邓紫棋',
         album: '摩天动物园',
         duration: '03:55',
-        platform: 'wy',
-        platformName: '网易云音乐',
         qualities: ['Hi-Res 无损', 'FLAC', '320K'],
         sampleRate: '96kHz / 24bit',
         hasLyrics: true
       }
     ];
 
-    let currentLxSearchResults = [...lxMockSongs];
+    let currentLxSearchResults = [...lxCustomSourceSongs];
 
-    // 平台切换 (首页小卡片)
-    function switchSearchPlatform(platformKey, el) {
-      document.querySelectorAll('#musicSearchCard .platform-tab-chip').forEach(c => c.classList.remove('active'));
-      if (el) el.classList.add('active');
-      currentSearchPlatform = platformKey;
-      const platformNames = { 'all': '全网聚合', 'tx': '企鹅音乐', 'kg': '酷狗音乐', 'wy': '网易云音乐', 'kw': '酷我音乐', 'mg': '咪咕音乐' };
-      showToast(`已切换至「${platformNames[platformKey]}」音源平台`, '🔍');
-    }
-
-    // 首页小卡片回车搜索 -> 唤醒完整 LX 搜索工坊
+    // 首页小卡片回车搜索 -> 唤醒自定义源搜索中心
     function doCloudMusicSearch() {
       const input = document.getElementById('cloudMusicSearchInput');
       const val = input ? input.value.trim() : '';
@@ -4871,7 +4934,7 @@
       openLxMusicStudio(tag);
     }
 
-    // 打开洛雪音乐搜索中心
+    // 打开自定义源音乐搜索中心
     function openLxMusicStudio(keyword) {
       const modal = document.getElementById('modalLxMusicStudio');
       if (modal) modal.classList.add('show');
@@ -4882,44 +4945,23 @@
         }
         input.focus();
       }
-      syncLxStudioPlatformChips();
+      refreshStudioSourceChannelInfo();
       doLxStudioSearch(keyword);
     }
 
-    function syncLxStudioPlatformChips() {
-      document.querySelectorAll('.lx-platform-filter-row .platform-tab-chip').forEach(c => c.classList.remove('active'));
-      const activeChip = document.getElementById('chipLx_' + currentSearchPlatform);
-      if (activeChip) activeChip.classList.add('active');
-    }
-
-    function filterLxPlatform(platformKey, el) {
-      document.querySelectorAll('.lx-platform-filter-row .platform-tab-chip').forEach(c => c.classList.remove('active'));
-      if (el) el.classList.add('active');
-      currentSearchPlatform = platformKey;
-      // 同时更新首页卡片
-      document.querySelectorAll('#musicSearchCard .platform-tab-chip').forEach(c => {
-        if (c.textContent.trim().includes(getPlatformShortName(platformKey))) {
-          c.classList.add('active');
-        } else {
-          c.classList.remove('active');
-        }
-      });
-      doLxStudioSearch();
-    }
-
-    function getPlatformShortName(key) {
-      const map = { 'all': '聚合', 'tx': '企鹅', 'kg': '酷狗', 'wy': '网易', 'kw': '酷我', 'mg': '咪咕' };
-      return map[key] || '聚合';
+    function refreshStudioSourceChannelInfo() {
+      const srcInfo = lxCustomSources[currentLxSource] || lxCustomSources['sixin'];
+      const channelName = document.getElementById('lxStudioChannelName');
+      const channelPing = document.getElementById('lxStudioChannelPing');
+      if (channelName) channelName.textContent = srcInfo.name;
+      if (channelPing) channelPing.textContent = `${srcInfo.ping}ms ${srcInfo.status === '本地' ? '本地' : '极佳'}`;
     }
 
     function doLxStudioSearch(kwOverride) {
       const input = document.getElementById('lxStudioSearchInput');
       const kw = (kwOverride !== undefined ? kwOverride : (input ? input.value : '')).trim().toLowerCase();
 
-      let results = lxMockSongs;
-      if (currentSearchPlatform !== 'all') {
-        results = results.filter(s => s.platform === currentSearchPlatform);
-      }
+      let results = lxCustomSourceSongs;
       if (kw) {
         results = results.filter(s => s.title.toLowerCase().includes(kw) || s.artist.toLowerCase().includes(kw) || s.album.toLowerCase().includes(kw));
         if (results.length === 0) {
@@ -4927,11 +4969,9 @@
             {
               id: 'lx_custom_1',
               title: kwOverride || (input ? input.value : '搜索曲目'),
-              artist: '全网原唱 / 网络热门',
-              album: '热门现场版与官方原版',
+              artist: '自定义源抓取 / 网络原版',
+              album: '高保真录音室工程',
               duration: '03:45',
-              platform: currentSearchPlatform === 'all' ? 'tx' : currentSearchPlatform,
-              platformName: getPlatformFullName(currentSearchPlatform),
               qualities: ['FLAC 无损', '320K', '128K'],
               sampleRate: '48kHz / 24bit',
               hasLyrics: true
@@ -4942,8 +4982,6 @@
               artist: '官方伴奏母带',
               album: '纯伴奏无损收录',
               duration: '03:45',
-              platform: currentSearchPlatform === 'all' ? 'wy' : currentSearchPlatform,
-              platformName: getPlatformFullName(currentSearchPlatform),
               qualities: ['FLAC 无损', '320K'],
               sampleRate: '48kHz / 24bit',
               hasLyrics: true
@@ -4956,11 +4994,6 @@
       renderLxSearchResults(results);
     }
 
-    function getPlatformFullName(key) {
-      const map = { 'all': '全网聚合', 'tx': '企鹅音乐', 'kg': '酷狗音乐', 'wy': '网易云音乐', 'kw': '酷我音乐', 'mg': '咪咕音乐' };
-      return map[key] || '全网音源';
-    }
-
     function renderLxSearchResults(list) {
       const container = document.getElementById('lxResultsContainer');
       if (!container) return;
@@ -4969,22 +5002,15 @@
         container.innerHTML = `
           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:240px; color:var(--text-dim); gap:10px;">
             <span style="font-size:36px;">🔍</span>
-            <span style="font-size:13px;">未检索到相关曲目，可尝试切换其他音源平台或检查自定义源配置</span>
+            <span style="font-size:13px;">未在当前自定义源中检索到曲目，可尝试更换关键词或在设置中切换自定义音源脚本</span>
           </div>
         `;
         return;
       }
 
-      const platformBadgeColors = {
-        'tx': 'background:rgba(18,185,129,0.15); color:#10b981; border:1px solid rgba(18,185,129,0.3);',
-        'wy': 'background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3);',
-        'kg': 'background:rgba(59,130,246,0.15); color:#3b82f6; border:1px solid rgba(59,130,246,0.3);',
-        'kw': 'background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3);',
-        'mg': 'background:rgba(236,72,153,0.15); color:#ec4899; border:1px solid rgba(236,72,153,0.3);'
-      };
+      const srcInfo = lxCustomSources[currentLxSource] || lxCustomSources['sixin'];
 
       container.innerHTML = list.map((song, idx) => {
-        const pColor = platformBadgeColors[song.platform] || 'background:rgba(0,242,254,0.15); color:var(--glow-primary); border:1px solid rgba(0,242,254,0.3);';
         return `
           <div class="lx-song-row" id="lxSongRow_${idx}">
             <div class="lx-song-left">
@@ -4994,7 +5020,7 @@
               <div class="lx-song-info">
                 <div class="lx-song-title-line">
                   <span class="lx-song-title">${song.title}</span>
-                  <span class="lx-platform-tag" style="${pColor}">${song.platformName}</span>
+                  <span class="lx-platform-tag" style="background:rgba(0,242,254,0.12); color:var(--glow-primary); border:1px solid rgba(0,242,254,0.3);">⚡ ${srcInfo.short}</span>
                   <span class="lx-quality-tag">FLAC 无损</span>
                 </div>
                 <div class="lx-song-meta-line">
@@ -5009,7 +5035,7 @@
 
             <div class="lx-song-right">
               <span class="lx-duration-col">${song.duration}</span>
-              <button class="btn-lx-action" onclick="previewLxSong('${song.title}', '${song.artist}')" title="试听原曲片段">
+              <button class="btn-lx-action" onclick="previewLxSong('${song.title}', '${song.artist}')" title="试听当前自定义源音频片段">
                 <span>🎧 试听</span>
               </button>
               <button class="btn-lx-action btn-lx-dl" onclick="downloadLxSong(${idx})" title="无损下载伴奏、原音频与逐字 LRC">
@@ -5025,12 +5051,14 @@
     }
 
     function previewLxSong(title, artist) {
-      showToast(`正在通过洛雪六音源试听《${title} - ${artist}》试听切片...`, '🎧');
+      const srcInfo = lxCustomSources[currentLxSource] || lxCustomSources['sixin'];
+      showToast(`正在通过「${srcInfo.short}」试听《${title} - ${artist}》试听切片...`, '🎧');
     }
 
     function downloadLxSong(idx) {
-      const song = currentLxSearchResults[idx] || lxMockSongs[0];
-      showToast(`正在下载《${song.title}》FLAC 无损音频与 LRC 逐字歌词文件...`, '⬇️');
+      const song = currentLxSearchResults[idx] || lxCustomSourceSongs[0];
+      const srcInfo = lxCustomSources[currentLxSource] || lxCustomSources['sixin'];
+      showToast(`正在通过「${srcInfo.short}」下载《${song.title}》FLAC 无损音频与 LRC 逐字歌词...`, '⬇️');
       setTimeout(() => {
         showToast(`🎉《${song.title} - ${song.artist}》FLAC 与歌词已下载至 Downloads 目录`, '💾');
       }, 1000);
@@ -5038,7 +5066,7 @@
 
     // ========================================================
     // 一键训练处理流水线 (One-Click Training Pipeline)
-    // 1. 洛雪音源无损拉取 FLAC 与 LRC
+    // 1. 自定义源无损拉取 FLAC 与 LRC
     // 2. HTDemucs 48kHz 人声与伴奏物理剥离
     // 3. RMVPE 提取音高走势与干声音素特征向量
     // 4. 注入本地播放列表与任务大厅
@@ -5049,7 +5077,8 @@
         showToast('已有音频训练任务正在执行中，请稍候...', '⏳');
         return;
       }
-      const song = currentLxSearchResults[idx] || lxMockSongs[0];
+      const song = currentLxSearchResults[idx] || lxCustomSourceSongs[0];
+      const srcInfo = lxCustomSources[currentLxSource] || lxCustomSources['sixin'];
       isTrainingInProgress = true;
 
       const wrap = document.getElementById('lxTrainProgressWrap');
@@ -5060,7 +5089,7 @@
       if (wrap) wrap.style.display = 'block';
       if (bar) bar.style.width = '0%';
       if (pct) pct.textContent = '0%';
-      if (lbl) lbl.textContent = `[1/4] 正在通过洛雪音源拉取《${song.title}》FLAC 无损音频与动态歌词...`;
+      if (lbl) lbl.textContent = `[1/4] 正在通过自定义源（${srcInfo.short}）拉取《${song.title}》FLAC 无损音频与动态歌词...`;
 
       showToast(`🚀 已启动《${song.title}》一键训练处理管线！`, '⚡');
 
@@ -5122,7 +5151,7 @@
       newRow.innerHTML = `
         <div class="song-item-left">
           <span class="song-item-title">${song.title}</span>
-          <span class="song-alt-badge active" title="洛雪音源一键训练完成，伴奏与改词轨已就绪">⚡ 洛雪训练</span>
+          <span class="song-alt-badge active" title="自定义源一键训练完成，伴奏与改词轨已就绪">⚡ 自定义源训练</span>
         </div>
         <span class="song-group-tag" onclick="event.stopPropagation(); openSongMenu(this, '${song.title}')">流行</span>
       `;
@@ -5145,7 +5174,7 @@
       const randomId = '#' + Math.floor(25 + Math.random() * 20);
       newTr.innerHTML = `
         <td>${randomId}</td>
-        <td>lx_train_process</td>
+        <td>custom_source_train</td>
         <td>${songTitle}</td>
         <td>
           <div style="width: 120px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
@@ -5185,16 +5214,28 @@
     function saveAndApplyCustomSource() {
       const srcInfo = lxCustomSources[currentLxSource] || lxCustomSources['sixin'];
       const cardState = document.getElementById('cardLxSourceState');
-      const notice = document.getElementById('lxSourceStatusNotice');
+      const cardName = document.getElementById('cardActiveSourceName');
+      const cardPing = document.getElementById('cardActiveSourcePing');
+      const studioName = document.getElementById('lxStudioChannelName');
+      const studioPing = document.getElementById('lxStudioChannelPing');
 
-      const shortName = currentLxSource === 'sixin' ? '六音源' : (currentLxSource === 'ikun' ? '爱坤源' : '本地源');
       if (cardState) {
-        cardState.textContent = `⚙️ ${shortName} (正常)`;
+        cardState.textContent = `⚙️ ${srcInfo.short} (正常)`;
       }
-      if (notice) {
-        notice.textContent = `● ${shortName}自定义源已激活 (${srcInfo.ping}ms)`;
+      if (cardName) {
+        cardName.textContent = srcInfo.name.split('·')[0].trim();
+      }
+      if (cardPing) {
+        cardPing.textContent = `${srcInfo.ping}ms ⚙️ 管理`;
+      }
+      if (studioName) {
+        studioName.textContent = srcInfo.name;
+      }
+      if (studioPing) {
+        studioPing.textContent = `${srcInfo.ping}ms ${srcInfo.status === '本地' ? '本地' : '正常'}`;
       }
       closeModal('modalLxCustomSource');
+      doLxStudioSearch();
       showToast(`已成功生效自定义音源配置：${srcInfo.name}`, '🎉');
     }
 
