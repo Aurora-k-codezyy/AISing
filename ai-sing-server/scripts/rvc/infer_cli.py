@@ -65,8 +65,19 @@ def require_file(path: str | Path, label: str) -> Path:
 
 
 def resolve_required_index(model_path: Path, index: str) -> Path:
-    index_path = Path(index).resolve() if index else model_path.with_name("model.index")
-    return require_file(index_path, "RVC index")
+    if index:
+        return require_file(Path(index).resolve(), "RVC index")
+    candidates = [
+        model_path.with_name("model.index"),
+        model_path.with_suffix(".index"),
+    ]
+    for cand in candidates:
+        if cand.is_file():
+            return cand
+    indexes = list(model_path.parent.glob("*.index"))
+    if indexes:
+        return indexes[0]
+    return require_file(model_path.with_name("model.index"), "RVC index")
 
 
 if __name__ == "__main__":

@@ -1,24 +1,25 @@
-services:
-  ai-sing-server:
-    image: ai-sing-server:local
-    pull_policy: never
-    container_name: ai-sing-server
-    restart: unless-stopped
-    shm_size: "14gb"
-    working_dir: /app
-    command: ["python", "start.py"]
-    env_file:
-      - .env
-    ports:
-      - "8200:8200"
-    volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
-      - /opt/rvc-cli:/opt/rvc-cli
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+services:
+  ai-sing-server:
+    image: ai-sing-server:local
+    pull_policy: never
+    container_name: ai-sing-server
+    restart: unless-stopped
+    shm_size: "14gb"
+    working_dir: /app
+    command: ["python", "start.py"]
+    env_file:
+      - .env
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - /opt/rvc-cli:/opt/rvc-cli
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+

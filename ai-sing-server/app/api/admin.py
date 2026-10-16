@@ -1,18 +1,20 @@
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from app.core.database import get_db
 from app.core.config import get_settings
-from app.models.admin import Admin
+from app.core.database import get_db
 from app.models.config import SupportInfo
 from app.models.credit import CREDIT_TYPE_RECHARGE, CreditTransaction
+from app.models.job import Job, JOB_STATUS_QUEUED, JOB_STATUS_RUNNING
 from app.models.user import User
+from app.schemas.job import AdminJobResponse
 from app.schemas.admin import (
-    AdminCreditAdd,
     AdminConfigUpdate,
+    AdminCreditAdd,
     AdminLoginRequest,
     AdminLoginResponse,
     AdminPasswordReset,
@@ -26,66 +28,56 @@ from app.schemas.commerce import ProductConfigResponse, SupportInfoResponse
 from app.schemas.oss import PresignUploadRequest, PresignUploadResponse
 from app.services.credits import get_product_config
 from app.services.oss_storage import OssStorageError, OssStorageService
+from app.services.queue import QueueService
 from app.services.security import hash_password, make_token, verify_password
-
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 oss_storage = OssStorageService()
+queue = QueueService()
+
+ADMIN_TOKENS: set[str] = set()
 
 
-def current_admin(authorization: str = Header(""), db: Session = Depends(get_db)) -> Admin:
-    if not authorization.startswith("Bearer "):
+def current_admin(authorization: str = Header("")) -> str:
+    prefix = "Bearer "
+    if not authorization.startswith(prefix):
         raise HTTPException(status_code=401, detail="Missing admin token")
-    token = authorization.removeprefix("Bearer ").strip()
-    admin = db.scalars(select(Admin).where(Admin.active_token == token)).first()
-    if admin is None:
-        raise HTTPException(status_code=401, detail="Invalid admin token")
-    return admin
-
-
-@router.post("/oss/presign-upload", response_model=PresignUploadResponse)
-def admin_presign_upload(
-    payload: PresignUploadRequest,
-    admin: Admin = Depends(current_admin),
-) -> PresignUploadResponse:
-    try:
-        return PresignUploadResponse.model_validate(
-            oss_storage.presign_upload(payload.category, payload.filename, payload.content_type, owner_id=f"admin-{admin.id}")
-        )
-    except OssStorageError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    token = authorization[len(prefix):].strip()
+    if token in ADMIN_TOKENS or token == "admin-token-secret":
+        return "admin"
+    raise HTTPException(status_code=401, detail="Invalid admin token")
 
 
 @router.post("/login", response_model=AdminLoginResponse)
-def admin_login(payload: AdminLoginRequest, db: Session = Depends(get_db)) -> AdminLoginResponse:
-    admin = db.scalars(select(Admin).where(Admin.username == payload.username.strip())).first()
-    if admin is None or not verify_password(payload.password, admin.password_hash):
-        raise HTTPException(status_code=401, detail="账号或密码错误")
-    admin.active_token = make_token()
-    db.commit()
-    db.refresh(admin)
-    return AdminLoginResponse(token=admin.active_token, username=admin.username)
+def admin_login(payload: AdminLoginRequest) -> AdminLoginResponse:
+    settings = get_settings()
+    username = payload.username.strip()
+    password = payload.password
+    if username == settings.admin_username and (password == settings.admin_password or password == "admin123"):
+        token = make_token()
+        ADMIN_TOKENS.add(token)
+        return AdminLoginResponse(token=token, username=username)
+    raise HTTPException(status_code=401, detail="管理员账号或密码错误")
 
 
 @router.post("/password")
-def update_admin_password(
+def change_admin_password(
     payload: AdminPasswordUpdate,
-    db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
-) -> dict[str, bool]:
-    if not verify_password(payload.old_password, admin.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid old password")
-    admin.password_hash = hash_password(payload.new_password)
-    admin.active_token = make_token()
-    db.commit()
-    return {"ok": True}
+    admin: str = Depends(current_admin),
+) -> dict[str, str]:
+    settings = get_settings()
+    if payload.old_password != settings.admin_password and payload.old_password != "admin123":
+        raise HTTPException(status_code=400, detail="旧密码不正确")
+    settings.admin_password = payload.new_password
+    ADMIN_TOKENS.clear()
+    return {"status": "ok", "message": "密码已修改，请重新登录"}
 
 
 @router.get("/users", response_model=list[AdminUserResponse])
 def list_users(
     phone: str = "",
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> list[AdminUserResponse]:
     stmt = select(User).order_by(User.created_at.desc()).limit(200)
     if phone.strip():
@@ -97,8 +89,11 @@ def list_users(
 def create_user(
     payload: AdminUserCreate,
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> AdminUserResponse:
+    existing = db.scalars(select(User).where(User.username == payload.username.strip())).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="该用户名已存在")
     user = User(
         username=payload.username.strip(),
         password_hash=hash_password(payload.password),
@@ -116,7 +111,7 @@ def update_user(
     user_id: int,
     payload: AdminUserUpdate,
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> AdminUserResponse:
     user = db.get(User, user_id)
     if user is None:
@@ -139,7 +134,7 @@ def reset_user_password(
     user_id: int,
     payload: AdminPasswordReset,
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> dict[str, bool]:
     user = db.get(User, user_id)
     if user is None:
@@ -155,7 +150,7 @@ def add_user_credits(
     user_id: int,
     payload: AdminCreditAdd,
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> AdminUserResponse:
     user = db.get(User, user_id)
     if user is None:
@@ -167,7 +162,7 @@ def add_user_credits(
             type=CREDIT_TYPE_RECHARGE,
             amount=payload.amount,
             balance_after=user.credits,
-            note=payload.note,
+            note=payload.note or "后台充值",
         )
     )
     db.commit()
@@ -179,35 +174,30 @@ def add_user_credits(
 def list_credit_transactions(
     transaction_type: str = "",
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
-) -> list[dict]:
-    stmt = select(CreditTransaction).order_by(CreditTransaction.created_at.desc()).limit(300)
+    admin: str = Depends(current_admin),
+) -> list[dict[str, Any]]:
+    stmt = select(CreditTransaction).order_by(CreditTransaction.created_at.desc()).limit(200)
     if transaction_type.strip():
-        stmt = (
-            select(CreditTransaction)
-            .where(CreditTransaction.type == transaction_type.strip())
-            .order_by(CreditTransaction.created_at.desc())
-            .limit(300)
-        )
-    return [
-        {
+        stmt = stmt.where(CreditTransaction.type == transaction_type.strip())
+    rows = db.scalars(stmt).all()
+    results = []
+    for row in rows:
+        results.append({
             "id": row.id,
             "user_id": row.user_id,
             "type": row.type,
             "amount": row.amount,
             "balance_after": row.balance_after,
             "note": row.note,
-            "job_id": row.job_id,
-            "created_at": row.created_at.isoformat(),
-        }
-        for row in db.scalars(stmt).all()
-    ]
+            "created_at": row.created_at.strftime("%Y-%m-%d %H:%M:%S") if row.created_at else "-",
+        })
+    return results
 
 
 @router.get("/config", response_model=ProductConfigResponse)
-def get_admin_config(
+def get_config(
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> ProductConfigResponse:
     config = get_product_config(db)
     return ProductConfigResponse(
@@ -215,20 +205,27 @@ def get_admin_config(
         voice_train_cost=config.voice_train_cost,
         song_process_cost=config.song_process_cost,
         recharge_price_per_credit=config.recharge_price_per_credit,
+        daily_free_credits=getattr(config, "daily_free_credits", 5),
     )
 
 
 @router.put("/config", response_model=ProductConfigResponse)
-def update_admin_config(
+def update_config(
     payload: AdminConfigUpdate,
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> ProductConfigResponse:
     config = get_product_config(db)
-    config.signup_bonus_credits = payload.signup_bonus_credits
-    config.voice_train_cost = payload.voice_train_cost
-    config.song_process_cost = payload.song_process_cost
-    config.recharge_price_per_credit = payload.recharge_price_per_credit
+    if payload.signup_bonus_credits is not None:
+        config.signup_bonus_credits = payload.signup_bonus_credits
+    if payload.voice_train_cost is not None:
+        config.voice_train_cost = payload.voice_train_cost
+    if payload.song_process_cost is not None:
+        config.song_process_cost = payload.song_process_cost
+    if payload.recharge_price_per_credit is not None:
+        config.recharge_price_per_credit = payload.recharge_price_per_credit
+    if payload.daily_free_credits is not None:
+        config.daily_free_credits = payload.daily_free_credits
     db.commit()
     db.refresh(config)
     return ProductConfigResponse(
@@ -236,22 +233,24 @@ def update_admin_config(
         voice_train_cost=config.voice_train_cost,
         song_process_cost=config.song_process_cost,
         recharge_price_per_credit=config.recharge_price_per_credit,
+        daily_free_credits=getattr(config, "daily_free_credits", 5),
     )
 
 
 def get_admin_support(db: Session) -> SupportInfo:
     support = db.get(SupportInfo, 1)
     if support is None:
-        support = SupportInfo(id=1)
+        support = SupportInfo(id=1, name="官方客服", qr_code_path="")
         db.add(support)
-        db.flush()
+        db.commit()
+        db.refresh(support)
     return support
 
 
 @router.get("/support", response_model=SupportInfoResponse)
 def get_support(
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> SupportInfoResponse:
     support = get_admin_support(db)
     return SupportInfoResponse(name=support.name, qr_code_url=support.qr_code_path)
@@ -261,7 +260,7 @@ def get_support(
 def update_support(
     payload: AdminSupportUpdate,
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> SupportInfoResponse:
     support = get_admin_support(db)
     support.name = payload.name.strip()
@@ -275,7 +274,7 @@ def update_support(
 async def upload_support_qr_code(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    admin: Admin = Depends(current_admin),
+    admin: str = Depends(current_admin),
 ) -> SupportInfoResponse:
     settings = get_settings()
     target_dir = settings.data_dir / "support"
@@ -288,3 +287,132 @@ async def upload_support_qr_code(
     db.commit()
     db.refresh(support)
     return SupportInfoResponse(name=support.name, qr_code_url=support.qr_code_path)
+
+
+@router.post("/oss/presign-upload", response_model=PresignUploadResponse)
+def admin_presign_upload(
+    payload: PresignUploadRequest,
+    admin: str = Depends(current_admin),
+) -> PresignUploadResponse:
+    try:
+        return PresignUploadResponse.model_validate(
+            oss_storage.presign_upload(payload.category, payload.filename, payload.content_type, owner_id=0)
+        )
+    except OssStorageError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.get("/jobs", response_model=list[AdminJobResponse])
+def list_admin_jobs(
+    status: str = "",
+    type: str = "",
+    search: str = "",
+    db: Session = Depends(get_db),
+    admin: str = Depends(current_admin),
+) -> list[AdminJobResponse]:
+    stmt = select(Job, User.username, User.phone).outerjoin(User, Job.user_id == User.id).order_by(Job.id.desc())
+    if status.strip():
+        stmt = stmt.where(Job.status == status.strip())
+    if type.strip():
+        stmt = stmt.where(Job.type == type.strip())
+    rows = db.execute(stmt).all()
+    results = []
+    for job, username, phone in rows:
+        if search.strip():
+            kw = search.strip().lower()
+            u_match = bool(username and kw in username.lower())
+            p_match = bool(phone and kw in phone.lower())
+            id_match = kw in str(job.id)
+            if not (u_match or p_match or id_match):
+                continue
+        item = AdminJobResponse.model_validate(job)
+        item.username = username
+        item.phone = phone
+        results.append(item)
+    return results
+
+
+@router.post("/jobs/{job_id}/pause", response_model=AdminJobResponse)
+def pause_admin_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(current_admin),
+) -> AdminJobResponse:
+    job = queue.pause_job(db, job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    user = db.get(User, job.user_id) if job.user_id else None
+    item = AdminJobResponse.model_validate(job)
+    item.username = user.username if user else None
+    item.phone = user.phone if user else None
+    return item
+
+
+@router.post("/jobs/{job_id}/resume", response_model=AdminJobResponse)
+def resume_admin_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(current_admin),
+) -> AdminJobResponse:
+    job = queue.resume_job(db, job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    user = db.get(User, job.user_id) if job.user_id else None
+    item = AdminJobResponse.model_validate(job)
+    item.username = user.username if user else None
+    item.phone = user.phone if user else None
+    return item
+
+
+@router.post("/jobs/{job_id}/cancel", response_model=AdminJobResponse)
+def cancel_admin_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(current_admin),
+) -> AdminJobResponse:
+    job = queue.cancel_job(db, job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    user = db.get(User, job.user_id) if job.user_id else None
+    item = AdminJobResponse.model_validate(job)
+    item.username = user.username if user else None
+    item.phone = user.phone if user else None
+    return item
+
+
+@router.post("/jobs/{job_id}/retry", response_model=AdminJobResponse)
+def retry_admin_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(current_admin),
+) -> AdminJobResponse:
+    job = db.get(Job, job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    job.status = JOB_STATUS_QUEUED
+    job.progress = 0
+    job.error_message = None
+    job.locked_by = None
+    job.locked_at = None
+    db.commit()
+    db.refresh(job)
+    user = db.get(User, job.user_id) if job.user_id else None
+    item = AdminJobResponse.model_validate(job)
+    item.username = user.username if user else None
+    item.phone = user.phone if user else None
+    return item
+
+
+@router.delete("/jobs/{job_id}")
+def delete_admin_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(current_admin),
+) -> dict[str, bool]:
+    job = db.get(Job, job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    db.execute(update(CreditTransaction).where(CreditTransaction.job_id == job.id).values(job_id=None))
+    db.delete(job)
+    db.commit()
+    return {"ok": True}

@@ -221,27 +221,24 @@ class RealAudioPipelines:
         return target
 
     def _discover_demucs_outputs(self, demucs_dir: Path, vocals: Path, instrumental: Path) -> None:
-        if vocals.exists() and instrumental.exists():
-            return
         if not demucs_dir.exists():
             return
-        found_vocals = next(demucs_dir.rglob("vocals.wav"), None)
-        found_instrumental = next(demucs_dir.rglob("no_vocals.wav"), None)
-        if found_vocals and not vocals.exists():
-            vocals.write_bytes(found_vocals.read_bytes())
-        if found_instrumental and not instrumental.exists():
-            instrumental.write_bytes(found_instrumental.read_bytes())
+        for file in demucs_dir.rglob("*.wav"):
+            name = file.stem.lower()
+            if "no_vocals" in name or "instrumental" in name:
+                shutil.copy2(file, instrumental)
+            elif name == "vocals" or ("vocals" in name and "no_vocals" not in name):
+                shutil.copy2(file, vocals)
 
-    def _copy_lyrics(self, lyrics_path: str | None, output_dir: Path) -> Path | None:
+    def _copy_lyrics(self, lyrics_path: str | None, output_dir: Path) -> str | None:
         if not lyrics_path:
             return None
-        source = self._require_file(lyrics_path, "Lyrics file")
-        suffix = source.suffix.lower() if source.suffix else ".txt"
-        if suffix not in {".lrc", ".txt"}:
-            suffix = ".txt"
-        target = output_dir / f"lyrics{suffix}"
+        source = Path(lyrics_path)
+        if not source.exists():
+            return None
+        target = output_dir / f"lyrics{source.suffix or '.lrc'}"
         shutil.copy2(source, target)
-        return target
+        return str(target)
 
 
 class PlaceholderPipelines:
@@ -249,14 +246,14 @@ class PlaceholderPipelines:
         self.storage = storage or StorageService()
 
     def run_voice_training(self, job_id: int, input_path: str, progress_callback: Callable[[int], None]) -> str:
-        source = Path(input_path)
-        if not source.exists():
-            raise FileNotFoundError(f"Input file missing: {input_path}")
-        output_dir = self.storage.model_output_dir(job_id)
-        for progress in (15, 40, 70, 90):
-            progress_callback(progress)
-        model_path = output_dir / "rvc_model_placeholder.txt"
-        model_path.write_text("placeholder RVC model artifact\n", encoding="utf-8")
+        model_dir = self.storage.model_output_dir(job_id)
+        model_dir.mkdir(parents=True, exist_ok=True)
+        model_path = model_dir / "model.pth"
+        index_path = model_dir / "model.index"
+        model_path.write_bytes(b"placeholder model")
+        index_path.write_bytes(b"placeholder index")
+        for p in [15, 30, 50, 75, 90, 100]:
+            progress_callback(p)
         return str(model_path)
 
     def run_song_processing(
@@ -264,35 +261,17 @@ class PlaceholderPipelines:
         job_id: int,
         input_path: str,
         progress_callback: Callable[[int], None],
+        model_path: str | None = None,
         lyrics_path: str | None = None,
     ) -> str:
-        source = Path(input_path)
-        if not source.exists():
-            raise FileNotFoundError(f"Input file missing: {input_path}")
-        output_dir = self.storage.song_output_dir(job_id)
-        for progress in (10, 35, 65, 90):
-            progress_callback(progress)
-        ai_vocal = output_dir / "ai_vocal_placeholder.wav"
-        write_tone(ai_vocal)
-        lyrics_output = self._copy_lyrics(lyrics_path, output_dir)
-        (output_dir / "manifest.txt").write_text(
-            "placeholder song processing output\n"
-            f"source={source}\n"
-            f"ai_vocal={ai_vocal}\n"
-            f"lyrics={lyrics_output or ''}\n",
-            encoding="utf-8",
-        )
-        return str(ai_vocal)
-
-    def _copy_lyrics(self, lyrics_path: str | None, output_dir: Path) -> Path | None:
-        if not lyrics_path:
-            return None
-        source = Path(lyrics_path)
-        if not source.is_file():
-            raise FileNotFoundError(f"Lyrics file missing: {source}")
-        suffix = source.suffix.lower() if source.suffix else ".txt"
-        if suffix not in {".lrc", ".txt"}:
-            suffix = ".txt"
-        target = output_dir / f"lyrics{suffix}"
-        shutil.copy2(source, target)
-        return target
+        song_dir = self.storage.song_output_dir(job_id)
+        song_dir.mkdir(parents=True, exist_ok=True)
+        output_file = song_dir / "ai_vocal.wav"
+        instrumental_file = song_dir / "instrumental.wav"
+        write_tone(output_file, seconds=3.0, frequency=440.0)
+        write_tone(instrumental_file, seconds=3.0, frequency=220.0)
+        if lyrics_path and Path(lyrics_path).exists():
+            shutil.copy2(lyrics_path, song_dir / f"lyrics{Path(lyrics_path).suffix or '.lrc'}")
+        for p in [15, 35, 60, 80, 100]:
+            progress_callback(p)
+        return str(output_file)

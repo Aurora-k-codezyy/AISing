@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -82,6 +83,7 @@ def main() -> int:
             args.save_every_epoch,
         ),
         cwd=rvc_root,
+        total_epochs=args.epochs,
     )
     print("AIS_PROGRESS=85", flush=True)
     run(
@@ -120,12 +122,32 @@ def main() -> int:
     return 0
 
 
-def run(python_bin: str, rvc_cli: Path, args: list[str], cwd: Path) -> None:
-    command = [python_bin, str(rvc_cli), *args]
+def run(python_bin: str, rvc_cli: Path, args: list[str], cwd: Path, total_epochs: int = 1) -> None:
+    command = [python_bin, "-u", str(rvc_cli), *args]
     print("Running:", " ".join(command), flush=True)
-    result = subprocess.run(command, cwd=str(cwd), check=False, text=True)
-    if result.returncode != 0:
-        raise RuntimeError(f"Command failed with exit code {result.returncode}: {' '.join(command)}")
+    is_train = len(args) > 0 and args[0] == "train"
+    process = subprocess.Popen(
+        command,
+        cwd=str(cwd),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+    if process.stdout:
+        for line in process.stdout:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+            if is_train and "epoch=" in line:
+                m = re.search(r"epoch=(\d+)", line)
+                if m:
+                    ep = int(m.group(1))
+                    if total_epochs > 0:
+                        prog = min(84, int(40 + (ep / total_epochs) * 45))
+                        print(f"AIS_PROGRESS={prog}", flush=True)
+    returncode = process.wait()
+    if returncode != 0:
+        raise RuntimeError(f"Command failed with exit code {returncode}: {' '.join(command)}")
 
 
 def check_rvc_python_environment(python_bin: str, cwd: Path) -> None:

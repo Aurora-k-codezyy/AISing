@@ -9,7 +9,7 @@ from app.core.database import SessionLocal
 from app.models.job import JOB_TYPE_SONG_PROCESS, JOB_TYPE_VOICE_TRAIN
 from app.models.job import Job
 from app.services.oss_storage import OssObject, OssStorageService
-from app.services.pipelines import RealAudioPipelines
+from app.services.pipelines import PlaceholderPipelines, RealAudioPipelines
 from app.services.queue import QueueService
 from app.services.storage import StorageService
 
@@ -21,7 +21,18 @@ class BackgroundWorker:
     def __init__(self) -> None:
         self.worker_id = f"{socket.gethostname()}-worker"
         self.queue = QueueService()
-        self.pipelines = RealAudioPipelines()
+        rvc_cli_candidates = [
+            Path(r"E:\miscol\AISing\rvc-cli\rvc_cli.py"),
+            Path(__file__).resolve().parents[3] / "rvc-cli" / "rvc_cli.py",
+            Path("/opt/rvc-cli/rvc_cli.py"),
+        ]
+        rvc_cli = next((p for p in rvc_cli_candidates if p.exists()), None)
+        if rvc_cli:
+            logger.info("Using RealAudioPipelines with RVC CLI at %s", rvc_cli)
+            self.pipelines = RealAudioPipelines()
+        else:
+            logger.info("RVC CLI not found; using PlaceholderPipelines for local development")
+            self.pipelines = PlaceholderPipelines()
         self.storage = StorageService()
         self.oss_storage = OssStorageService()
         self._task: asyncio.Task | None = None
@@ -63,7 +74,17 @@ class BackgroundWorker:
                     input_path = self.localize_uploaded_input(job, "voice_train")
                     output_path = self.pipelines.run_voice_training(job.id, input_path, progress)
                 elif job.type == JOB_TYPE_SONG_PROCESS:
-                    model_job = self.queue.latest_successful_voice_model(db, job.user_id)
+                    metadata = self.metadata_dict(job.metadata_json)
+                    proc_opts = metadata.get("processing_options")
+                    model_job_id = metadata.get("model_job_id") or (proc_opts.get("model_job_id") if isinstance(proc_opts, dict) else None)
+                    model_job = None
+                    if model_job_id:
+                        try:
+                            model_job = db.get(Job, int(model_job_id))
+                        except Exception:
+                            model_job = None
+                    if not model_job:
+                        model_job = self.queue.latest_successful_voice_model(db, job.user_id)
                     model_path = self.localize_model_output(model_job) if model_job else None
                     input_path = self.localize_uploaded_input(job, "song")
                     lyrics_path = self.localize_lyrics(job)
@@ -81,6 +102,11 @@ class BackgroundWorker:
                 self.queue.mark_success(db, job.id, public_output_path)
                 logger.info("Job succeeded id=%s output=%s", job.id, public_output_path)
             except Exception as exc:
+                with SessionLocal() as check_db:
+                    latest = check_db.get(Job, job.id)
+                    if latest and latest.status in ("cancelled", "paused"):
+                        logger.info("Job id=%s was %s by user or admin; stopping cleanly", job.id, latest.status)
+                        return True
                 logger.exception("Job failed id=%s type=%s error=%s", job.id, job.type, exc)
                 self.queue.mark_failed(db, job.id, str(exc))
             return True
@@ -138,8 +164,6 @@ class BackgroundWorker:
         return str(localized_model)
 
     def upload_outputs_and_update_metadata(self, job: Job, output_path: str) -> str:
-        if not self.oss_storage.enabled:
-            return output_path
         if job.type == JOB_TYPE_VOICE_TRAIN:
             return self.upload_voice_outputs(job, output_path)
         if job.type == JOB_TYPE_SONG_PROCESS:
@@ -179,3 +203,4 @@ class BackgroundWorker:
             for name, item in files.items()
         }
         job.metadata_json = json.dumps(metadata, ensure_ascii=True)
+

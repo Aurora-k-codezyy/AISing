@@ -1,0 +1,100 @@
+from PySide6.QtCore import QTimer
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QMainWindow, QStackedWidget
+
+from aising_client.api import ApiClient
+from aising_client.branding import APP_ICON_PATH, APP_NAME
+from aising_client.ui.login import LoginWidget
+
+
+class MainWindow(QMainWindow):
+    def __init__(self, branding=None) -> None:
+        super().__init__()
+        self.branding = branding
+        title = branding.display_name if branding else APP_NAME
+        self.setWindowTitle(title)
+        icon_path = branding.icon_path if branding else APP_ICON_PATH
+        if icon_path and icon_path.exists():
+            self.setWindowIcon(QIcon(str(icon_path)))
+        self.resize(1240, 780)
+        self.theme = "light"
+        self.api = ApiClient()
+        self.stack = QStackedWidget()
+        self.login = LoginWidget(self.api)
+        self.login.logged_in.connect(self.show_app)
+        self.stack.addWidget(self.login)
+        self.setCentralWidget(self.stack)
+        self.apply_theme()
+        QTimer.singleShot(0, self.login.restore_saved_login)
+
+    def show_app(self, user: dict) -> None:
+        from aising_client.ui.jobs import JobsWidget
+
+        self.jobs = JobsWidget(self.api, user, self.toggle_theme, self.logout)
+        self.stack.addWidget(self.jobs)
+        self.stack.setCurrentWidget(self.jobs)
+
+    def logout(self) -> None:
+        self.api.logout()
+        self.login.clear_saved_login()
+        self.stack.setCurrentWidget(self.login)
+
+    def toggle_theme(self) -> str:
+        self.theme = "dark" if self.theme == "light" else "light"
+        self.apply_theme()
+        return self.theme
+
+    def apply_theme(self) -> None:
+        self.setStyleSheet(DARK_STYLE if self.theme == "dark" else LIGHT_STYLE)
+
+
+BASE_STYLE = """
+QMainWindow, QWidget {
+    font-family: "Microsoft YaHei UI", "Segoe UI", sans-serif;
+    font-size: 13px;
+}
+QLabel#PageTitle {
+    font-size: 22px;
+    font-weight: 700;
+}
+QLabel#SectionTitle {
+    font-size: 20px;
+    font-weight: 700;
+}
+QLabel#HeroTitle {
+    font-size: 34px;
+    font-weight: 800;
+}
+QLabel#Eyebrow {
+    font-size: 12px;
+    font-weight: 800;
+}
+QLabel#FeatureLine {
+    font-size: 14px;
+    font-weight: 700;
+}
+QLabel#ErrorText {
+    font-size: 13px;
+    font-weight: 700;
+}
+QLabel#MetricValue {
+    font-size: 18px;
+    font-weight: 700;
+}
+QPushButton {
+    border-radius: 8px;
+    padding: 8px 14px;
+}
+QPushButton:checked {
+    font-weight: 700;
+}
+QComboBox, QLineEdit {
+    border-radius: 6px;
+    padding: 7px 10px;
+}
+QTextEdit {
+    border-radius: 8px;
+    padding: 12px;
+}
+QSlider::groove:horizontal {
+    height: 6px;

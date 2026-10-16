@@ -1,6 +1,0 @@
---index-url https://download.pytorch.org/whl/cu126
---trusted-host download.pytorch.org
-
-torch==2.7.0
-torchaudio==2.7.0
-torchvision==0.22.0

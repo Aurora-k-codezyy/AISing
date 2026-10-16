@@ -10,6 +10,8 @@ from urllib.parse import quote, urlparse
 
 import requests
 
+import shutil
+
 from app.core.config import Settings, get_settings
 
 
@@ -47,9 +49,18 @@ class OssStorageService:
         content_type: str,
         owner_id: int | str | None = None,
     ) -> dict:
-        self._require_enabled()
         object_key = self.build_object_key(category, filename, owner_id)
         headers = {"Content-Type": content_type or "application/octet-stream"}
+        if not self.enabled:
+            base_url = "http://127.0.0.1:8200"
+            return {
+                "object_key": object_key,
+                "upload_url": f"{base_url}/api/oss/local-upload?object_key={object_key}",
+                "public_url": f"{base_url}/api/oss/local-files/{object_key}",
+                "headers": headers,
+                "expires_in": self.settings.oss_upload_expire_seconds,
+            }
+        self._require_enabled()
         upload_url = self._bucket(self.settings.oss_endpoint).sign_url(
             "PUT",
             object_key,
@@ -65,11 +76,19 @@ class OssStorageService:
         }
 
     def upload_file(self, path: str | Path, category: str, owner_id: int | str | None = None) -> OssObject:
-        self._require_enabled()
         source = Path(path)
         if not source.is_file():
             raise FileNotFoundError(f"OSS upload source missing: {source}")
         object_key = self.build_object_key(category, source.name, owner_id)
+        if not self.enabled:
+            target = Path(self.settings.data_dir) / "local_oss" / object_key
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, target)
+            base_url = "http://127.0.0.1:8200"
+            public_url = f"{base_url}/api/oss/local-files/{object_key}"
+            logger.info("Saved local object object_key=%s path=%s", object_key, target)
+            return OssObject(object_key=object_key, public_url=public_url)
+        self._require_enabled()
         logger.info("Uploading file to OSS via public endpoint object_key=%s source=%s", object_key, source)
         self._bucket(self.settings.oss_endpoint).put_object_from_file(
             object_key,
@@ -88,6 +107,10 @@ class OssStorageService:
             target_path.write_bytes(response.content)
             logger.info("Downloaded OSS object via public URL target=%s bytes=%s", target_path, target_path.stat().st_size)
             return target_path
+        local_candidate = Path(self.settings.data_dir) / "local_oss" / object_key_or_url
+        if local_candidate.is_file():
+            shutil.copy2(local_candidate, target_path)
+            return target_path
         object_key = self.object_key_from_url(object_key_or_url)
         if self.enabled and object_key:
             logger.info("Downloading OSS object via bucket object_key=%s target=%s", object_key, target_path)
@@ -97,6 +120,10 @@ class OssStorageService:
             )
             logger.info("Downloaded OSS object via bucket target=%s bytes=%s", target_path, target_path.stat().st_size)
             return target_path
+        local_cand2 = Path(self.settings.data_dir) / "local_oss" / object_key
+        if local_cand2.is_file():
+            shutil.copy2(local_cand2, target_path)
+            return target_path
         response = requests.get(object_key_or_url, timeout=120)
         response.raise_for_status()
         target_path.write_bytes(response.content)
@@ -105,33 +132,47 @@ class OssStorageService:
     def build_object_key(self, category: str, filename: str, owner_id: int | str | None = None) -> str:
         safe_category = self._safe_path_part(category)
         safe_name = Path(filename or "upload.bin").name
-        suffix = Path(safe_name).suffix
-        date_prefix = datetime.now(UTC).strftime("%Y/%m/%d")
-        owner_part = self._safe_path_part(str(owner_id)) if owner_id is not None else "public"
-        prefix = self.settings.oss_key_prefix.strip("/")
-        generated_name = f"{int(time.time() * 1000)}-{secrets.token_hex(6)}{suffix}"
-        return f"{prefix}/{safe_category}/{owner_part}/{date_prefix}/{generated_name}"
 
-    def public_url(self, object_key: str) -> str:
-        if self.settings.oss_public_base_url:
-            return f"{self.settings.oss_public_base_url.rstrip('/')}/{quote(object_key, safe='/')}"
-        endpoint = self.settings.oss_endpoint.replace("https://", "").replace("http://", "").rstrip("/")
-        return f"https://{self.settings.oss_bucket}.{endpoint}/{quote(object_key, safe='/')}"
+        # 5. If it's a localhost/internal URL, fetch it locally
+        if object_key_or_url.startswith(("http://127.0.0.1", "http://localhost")):
+            logger.info("Downloading object via local server URL source=%s target=%s", object_key_or_url, target_path)
+            response = requests.get(object_key_or_url, timeout=30)
+            response.raise_for_status()
+            target_path.write_bytes(response.content)
+            return target_path
 
-    def object_key_from_url(self, object_key_or_url: str) -> str:
-        if not object_key_or_url.startswith(("http://", "https://")):
-            return object_key_or_url
-        public_base = self.settings.oss_public_base_url.rstrip("/")
-        if public_base and object_key_or_url.startswith(public_base + "/"):
-            return object_key_or_url[len(public_base) + 1 :]
-        parsed = urlparse(object_key_or_url)
-        return parsed.path.lstrip("/")
+        # 6. Never connect to legacy remote cloud servers
+        legacy_remotes = ["154.8.173.242", "aliyuncs.com", "igiggle.cn"]
+        if any(r in object_key_or_url for r in legacy_remotes):
+            raise FileNotFoundError(
+                f"Local file not found for legacy remote object: {object_key_or_url}. "
+                "Remote connection blocked per project local-only policy."
+            )
+
+        # 7. Fallback for other URLs
+        response = requests.get(object_key_or_url, timeout=30)
+        response.raise_for_status()
+        target_path.write_bytes(response.content)
+        return target_path
+
+    def build_object_key(self, category: str, filename: str, owner_id: int | str | None = None) -> str:
+        safe_category = self._safe_path_part(category)
+        suffix = Path(filename).suffix or ".bin"
+        now = datetime.now()
+        date_path = now.strftime("%Y/%m/%d")
+        timestamp = int(now.timestamp() * 1000)
+        token = secrets.token_hex(6)
+        owner = str(owner_id or "common")
+        prefix = (getattr(self.settings, "oss_prefix", None) or "ai-sing").strip("/")
+        return f"{prefix}/{safe_category}/{owner}/{date_path}/{timestamp}-{token}{suffix}"
 
     def _bucket(self, endpoint: str):
-        import oss2
-
-        auth = oss2.Auth(self.settings.oss_access_key_id, self.settings.oss_access_key_secret)
-        return oss2.Bucket(auth, endpoint, self.settings.oss_bucket)
+        try:
+            import oss2
+            auth = oss2.Auth(self.settings.oss_access_key_id, self.settings.oss_access_key_secret)
+            return oss2.Bucket(auth, endpoint, self.settings.oss_bucket)
+        except ImportError:
+            raise OssStorageError("oss2 package is not installed")
 
     def _require_enabled(self) -> None:
         if not self.enabled:
@@ -140,3 +181,4 @@ class OssStorageService:
     def _safe_path_part(self, value: str) -> str:
         cleaned = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "-" for ch in value.strip())
         return cleaned.strip("-") or "default"
+

@@ -12,6 +12,7 @@ class ProductConfig(Base):
     voice_train_cost: Mapped[int] = mapped_column(Integer, default=450, nullable=False)
     song_process_cost: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     recharge_price_per_credit: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    daily_free_credits: Mapped[int] = mapped_column(Integer, default=5, nullable=False)
 
 
 class SupportInfo(Base):

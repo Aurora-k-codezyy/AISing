@@ -13,7 +13,7 @@ from app.schemas.commerce import (
     ProfileResponse,
     SupportInfoResponse,
 )
-from app.services.credits import get_product_config
+from app.services.credits import get_daily_free_remaining, get_product_config
 
 
 router = APIRouter(prefix="/api", tags=["commerce"])
@@ -24,7 +24,8 @@ def get_support_info(db: Session) -> SupportInfo:
     if support is None:
         support = SupportInfo(id=1)
         db.add(support)
-        db.flush()
+        db.commit()
+        db.refresh(support)
     return support
 
 
@@ -35,6 +36,7 @@ def config_response(db: Session) -> ProductConfigResponse:
         voice_train_cost=config.voice_train_cost,
         song_process_cost=config.song_process_cost,
         recharge_price_per_credit=config.recharge_price_per_credit,
+        daily_free_credits=getattr(config, "daily_free_credits", 5),
     )
 
 
@@ -45,11 +47,13 @@ def support_response(db: Session) -> SupportInfoResponse:
 
 @router.get("/profile", response_model=ProfileResponse)
 def profile(db: Session = Depends(get_db), user: User = Depends(current_user)) -> ProfileResponse:
+    free_remaining = get_daily_free_remaining(db, user)
     return ProfileResponse(
         user_id=user.id,
         username=user.username,
         phone=user.phone,
         credits=user.credits,
+        online_song_process_free_remaining=free_remaining,
         config=config_response(db),
         support=support_response(db),
     )
@@ -77,3 +81,18 @@ def public_support(db: Session = Depends(get_db)) -> SupportInfoResponse:
 @router.get("/public/config", response_model=ProductConfigResponse)
 def public_config(db: Session = Depends(get_db)) -> ProductConfigResponse:
     return config_response(db)
+
+
+@router.get("/public/client-branding")
+def public_client_branding():
+    return {
+        "app_name": "青玄",
+        "display_name": "青玄",
+        "logo_url": "",
+        "icon_url": "",
+    }
+
+
+@router.get("/public/client-components")
+def public_client_components():
+    return []

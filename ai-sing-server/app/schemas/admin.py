@@ -1,11 +1,10 @@
 from datetime import datetime
-
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class AdminLoginRequest(BaseModel):
-    username: str = Field(min_length=1, max_length=128)
-    password: str = Field(min_length=1, max_length=128)
+    username: str
+    password: str
 
 
 class AdminLoginResponse(BaseModel):
@@ -13,25 +12,20 @@ class AdminLoginResponse(BaseModel):
     username: str
 
 
-class AdminPasswordUpdate(BaseModel):
-    old_password: str
-    new_password: str = Field(min_length=6, max_length=128)
-
-
 class AdminUserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     username: str
-    phone: str
+    phone: str | None = None
     credits: int
     status: str
-    created_at: datetime
-
-    model_config = {"from_attributes": True}
+    created_at: datetime | None = None
 
 
 class AdminUserCreate(BaseModel):
-    username: str = Field(min_length=1, max_length=128)
-    password: str = Field(min_length=1, max_length=128)
+    username: str
+    password: str
     phone: str = ""
     credits: int = 480
 
@@ -44,21 +38,27 @@ class AdminUserUpdate(BaseModel):
 
 
 class AdminPasswordReset(BaseModel):
-    password: str = Field(min_length=1, max_length=128)
+    password: str
 
 
 class AdminCreditAdd(BaseModel):
-    amount: int = Field(gt=0)
-    note: str = "后台充值"
-
-
-class AdminConfigUpdate(BaseModel):
-    signup_bonus_credits: int = Field(ge=0)
-    voice_train_cost: int = Field(ge=0)
-    song_process_cost: int = Field(ge=0)
-    recharge_price_per_credit: int = Field(ge=0)
+    amount: int
+    note: str = ""
 
 
 class AdminSupportUpdate(BaseModel):
-    name: str = Field(min_length=1, max_length=128)
+    name: str
     qr_code_url: str = ""
+
+
+class AdminConfigUpdate(BaseModel):
+    signup_bonus_credits: int | None = None
+    voice_train_cost: int | None = None
+    song_process_cost: int | None = None
+    recharge_price_per_credit: int | None = None
+    daily_free_credits: int | None = None
+
+
+class AdminPasswordUpdate(BaseModel):
+    old_password: str
+    new_password: str

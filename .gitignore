@@ -20,22 +20,30 @@ dist/
 build/
 .vite/
 
-# Runtime data
+# Runtime data & temp
 data/
 logs/
 wheels/
 *.log
+downloads/
+妙唱 云端版.exe_extracted/
 
 # Local environment overrides
 .env.local
 .env.*.local
 
-# Audio/model artifacts
+# Audio/model large artifacts
 *.wav
 *.mp3
 *.flac
 *.m4a
 *.pth
+*.pt
+*.bin
 *.index
 *.ckpt
 *.onnx
+*.db
+*.sqlite3
+rvc-cli/rvc/models/
+

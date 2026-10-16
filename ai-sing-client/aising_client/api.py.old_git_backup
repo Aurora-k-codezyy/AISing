@@ -1,0 +1,85 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        return response.json()
+
+    def create_song_process_job(self, path: Path, lyrics_path: Path, task_name: str) -> dict:
+        task_name = task_name.strip() or path.stem
+        audio = self.upload_to_oss(path, "song_process")
+        lyrics = self.upload_to_oss(lyrics_path, "song_lyrics")
+        response = self._request(
+            "POST",
+            f"{self.base_url}/api/jobs/song-process/complete",
+            json={"task_name": task_name, "audio": audio, "lyrics": lyrics},
+            headers=self.auth_headers(),
+            timeout=30,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def list_jobs(self, user_id: int | None = None) -> list[dict]:
+        response = self._request("GET", f"{self.base_url}/api/jobs", headers=self.auth_headers(), timeout=10)
+        response.raise_for_status()
+        return response.json()
+

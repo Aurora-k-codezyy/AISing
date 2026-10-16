@@ -1,0 +1,4490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>青玄 AI 音效工坊 · 客户端方案 A 升级交互全景原型</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080a10;
+      --bg-surface: rgba(15, 19, 32, 0.85);
+      --bg-surface-elevated: rgba(22, 28, 48, 0.75);
+      --bg-input: rgba(12, 16, 28, 0.9);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(0, 242, 254, 0.35);
+      --text-main: #f3f6fc;
+      --text-muted: #8c9bb5;
+      --text-dim: #54607a;
+      
+      /* Theme Presets: Default Cyan (极客青) */
+      --glow-primary: #00f2fe;
+      --glow-secondary: #4facfe;
+      --glow-accent: #7f00ff;
+      --glow-success: #00f5a0;
+      --glow-warning: #f59e0b;
+      --glow-danger: #ef4444;
+      --accent-gradient: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #7f00ff 100%);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 242, 254, 0.12);
+      --prismatic-flow: linear-gradient(90deg, #00f2fe, #4facfe, #a855f7, #ec4899, #00f2fe);
+    }
+
+    [data-theme="aurora"] {
+      --glow-primary: #ec4899;
+      --glow-secondary: #a855f7;
+      --glow-accent: #3b82f6;
+      --accent-gradient: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #3b82f6 100%);
+      --border-glow: rgba(236, 72, 153, 0.35);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(236, 72, 153, 0.12);
+      --prismatic-flow: linear-gradient(90deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #ec4899);
+    }
+
+    [data-theme="gold"] {
+      --glow-primary: #f59e0b;
+      --glow-secondary: #fbbf24;
+      --glow-accent: #ea580c;
+      --accent-gradient: linear-gradient(135deg, #f59e0b 0%, #fbbf24 50%, #ea580c 100%);
+      --border-glow: rgba(245, 158, 11, 0.35);
+      --glass-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(245, 158, 11, 0.12);
+      --prismatic-flow: linear-gradient(90deg, #f59e0b, #fbbf24, #ea580c, #ef4444, #f59e0b);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    body {
+      background: var(--bg-dark);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient Background Glow */
+    .ambient-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(140px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.22;
+      animation: floatPulse 16s infinite alternate ease-in-out;
+    }
+    .orb-1 {
+      top: -150px;
+      left: -100px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, var(--glow-primary) 0%, transparent 70%);
+    }
+    .orb-2 {
+      bottom: -150px;
+      right: -100px;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, var(--glow-accent) 0%, transparent 70%);
+      animation-delay: -8s;
+    }
+
+    @keyframes floatPulse {
+      0% { transform: scale(1) translate(0, 0); opacity: 0.18; }
+      50% { transform: scale(1.15) translate(40px, 30px); opacity: 0.32; }
+      100% { transform: scale(0.95) translate(-30px, -20px); opacity: 0.22; }
+    }
+
+    /* Application Root Window */
+    .app-window {
+      position: relative;
+      z-index: 10;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: rgba(10, 13, 22, 0.94);
+      backdrop-filter: blur(28px);
+    }
+
+    /* Top Custom TitleBar & Main Nav */
+    .titlebar {
+      height: 52px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: rgba(13, 17, 30, 0.85);
+      backdrop-filter: blur(20px);
+      z-index: 100;
+      flex-shrink: 0;
+    }
+
+    .titlebar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 14px;
+      border-right: 1px solid var(--border-subtle);
+    }
+    .brand-logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      color: #000;
+      box-shadow: 0 0 16px var(--glow-primary);
+    }
+    .brand-name {
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge-tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 12px;
+      background: rgba(0, 242, 254, 0.12);
+      color: var(--glow-primary);
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Core Navigation Tabs */
+    .header-nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+    .nav-tab-btn {
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+    }
+    .nav-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-tab-btn.active {
+      color: #ffffff;
+      background: rgba(0, 242, 254, 0.14);
+      border-color: rgba(0, 242, 254, 0.4);
+      box-shadow: 0 0 14px rgba(0, 242, 254, 0.2);
+    }
+    [data-theme="aurora"] .nav-tab-btn.active {
+      background: rgba(236, 72, 153, 0.15);
+      border-color: rgba(236, 72, 153, 0.45);
+      box-shadow: 0 0 14px rgba(236, 72, 153, 0.25);
+    }
+    [data-theme="gold"] .nav-tab-btn.active {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.45);
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
+    }
+
+    /* Right Utilities */
+    .titlebar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-action-btn {
+      padding: 6px 13px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .top-action-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-glow);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.15);
+      transform: translateY(-1px);
+    }
+
+    /* Header Dropdown Menu (训练处理 / 我的 / 设置) */
+    .header-dropdown-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .header-dropdown-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .header-dropdown-btn:hover, .header-dropdown-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-glow);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.18);
+    }
+    .header-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 230px;
+      background: rgba(14, 19, 34, 0.96);
+      border: 1px solid var(--border-glow);
+      border-radius: 12px;
+      padding: 6px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 242, 254, 0.18);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .header-dropdown-menu.show {
+      display: flex;
+      animation: dropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .dropdown-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-main);
+    }
+    .dropdown-nav-item:hover {
+      background: rgba(0, 242, 254, 0.12);
+      transform: translateX(2px);
+    }
+    .dropdown-nav-item.active {
+      background: rgba(0, 242, 254, 0.18);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+    }
+    .dropdown-nav-item .d-icon {
+      font-size: 16px;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .dropdown-nav-item .d-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .dropdown-nav-item .d-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .dropdown-nav-item .d-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .dropdown-sep {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 4px 6px;
+    }
+
+    /* View Toggle Button */
+    .view-toggle-btn {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(127, 0, 255, 0.15));
+      border: 1px solid var(--border-glow);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .view-toggle-btn:hover {
+      box-shadow: 0 0 14px var(--glow-primary);
+      transform: scale(1.02);
+    }
+
+    /* Click-to-Expand Theme Switcher (点击展开配色选择) */
+    .theme-dropdown-container {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .theme-menu-btn {
+      padding: 5px 11px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .theme-menu-btn:hover, .theme-menu-btn.active {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--border-glow);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.16);
+    }
+    .theme-current-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .theme-menu-popover {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 236px;
+      background: rgba(14, 19, 34, 0.97);
+      border: 1px solid var(--border-glow);
+      border-radius: 12px;
+      padding: 8px;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 242, 254, 0.18);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .theme-menu-popover.show {
+      display: flex;
+      animation: dropFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .theme-menu-header {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 4px 8px 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      letter-spacing: 0.5px;
+    }
+    .theme-menu-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .theme-menu-option:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .theme-menu-option.active {
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+    }
+    .t-opt-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .theme-preview-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .t-opt-meta {
+      display: flex;
+      flex-direction: column;
+    }
+    .t-opt-name {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .t-opt-desc {
+      font-size: 9.5px;
+      color: var(--text-muted);
+    }
+    .t-opt-check {
+      font-size: 11px;
+      color: var(--glow-primary);
+      font-weight: 800;
+      opacity: 0;
+    }
+    .theme-menu-option.active .t-opt-check {
+      opacity: 1;
+    }
+    .td-cyan { background: #00f2fe; box-shadow: 0 0 8px #00f2fe; }
+    .td-aurora { background: #ec4899; box-shadow: 0 0 8px #ec4899; }
+    .td-gold { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+
+    /* Window Controls */
+    .window-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 6px;
+    }
+    .win-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 12px;
+      transition: all 0.15s ease;
+    }
+    .win-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    .win-btn.close:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    /* Main Workspace */
+    .main-workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tab-content {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      height: 100%;
+    }
+    .tab-content.active {
+      display: flex;
+    }
+
+    /* ========================================================
+       TAB 1: 播放 (PLAYBACK) - 完美满足最新四项改版
+       1. 歌曲列表占满窗口全高
+       2. 右边红框移到左边模式切换下方，模式切换按钮改小
+       3. 4个模式按钮换成 4连单选滑块
+       4. 波形样子还原原版细密峰值线，动态采用平滑渐变流光
+       5. 4通道音量中间值为100%，往左变小，往右可超100%
+       6. 歌词去发光，纯净多彩慢速渐变
+       ======================================================== */
+    .playback-container {
+      flex: 1;
+      display: flex;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* 左侧: 歌词与歌曲列表面板 (高度占满窗口高度！) */
+    .song-library-pane {
+      width: 280px;
+      height: 100%; /* 占满窗口全高 */
+      background: rgba(14, 18, 30, 0.85);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 14px;
+      gap: 12px;
+      flex-shrink: 0;
+      backdrop-filter: blur(20px);
+      z-index: 20;
+    }
+
+    .search-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .song-search-input {
+      width: 100%;
+      height: 38px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0 34px 0 12px;
+      color: var(--text-main);
+      font-size: 13px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .song-search-input:focus {
+      border-color: var(--glow-primary);
+      box-shadow: 0 0 14px rgba(0, 242, 254, 0.2);
+    }
+    .search-icon-pos {
+      position: absolute;
+      right: 12px;
+      color: var(--text-dim);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    /* 分组切换栏 */
+    .category-tabs-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cat-pill {
+      flex: 1;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .cat-pill:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .cat-pill.active {
+      color: #fff;
+      background: rgba(0, 242, 254, 0.12);
+      border-color: rgba(0, 242, 254, 0.45);
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.18);
+    }
+    [data-theme="aurora"] .cat-pill.active {
+      background: rgba(236, 72, 153, 0.15);
+      border-color: rgba(236, 72, 153, 0.45);
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.2);
+    }
+    [data-theme="gold"] .cat-pill.active {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.45);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+    .cat-add-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    .cat-add-btn:hover {
+      color: var(--glow-primary);
+      border-color: var(--glow-primary);
+      background: rgba(0, 242, 254, 0.1);
+    }
+
+    /* 歌曲列表 (占满全屏高度垂直滚动) */
+    .song-list-container {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding-right: 4px;
+    }
+    .song-list-container::-webkit-scrollbar {
+      width: 4px;
+    }
+    .song-list-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 4px;
+    }
+
+    .song-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid transparent;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .song-item-row:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.06);
+      transform: translateX(2px);
+    }
+    .song-item-row.active {
+      background: rgba(0, 242, 254, 0.08);
+      border-color: rgba(0, 242, 254, 0.28);
+      box-shadow: 0 0 16px rgba(0, 242, 254, 0.08);
+    }
+    [data-theme="aurora"] .song-item-row.active {
+      background: rgba(236, 72, 153, 0.08);
+      border-color: rgba(236, 72, 153, 0.3);
+    }
+    [data-theme="gold"] .song-item-row.active {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .song-item-row.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 3.5px;
+      border-radius: 0 3px 3px 0;
+      background: var(--glow-primary);
+      box-shadow: 0 0 10px var(--glow-primary);
+    }
+
+    .song-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+      flex: 1;
+    }
+    .song-checkbox-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 11px;
+      color: transparent;
+      transition: all 0.2s ease;
+    }
+    .song-item-row.active .song-checkbox-icon {
+      border-color: var(--glow-primary);
+      background: rgba(0, 242, 254, 0.15);
+      color: var(--glow-primary);
+    }
+    .song-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .song-item-row.active .song-item-title {
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .song-group-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .song-group-tag:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+      border-color: var(--border-glow);
+    }
+
+    .library-foot-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .lib-upload-btn {
+      width: 100%;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px dashed rgba(255, 255, 255, 0.15);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .lib-upload-btn:hover {
+      border-color: var(--glow-primary);
+      color: var(--glow-primary);
+      background: rgba(0, 242, 254, 0.06);
+    }
+
+    /* 右侧综合主工作区 */
+    .playback-right-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100%;
+      position: relative;
+    }
+
+    /* 歌词舞台大屏 */
+    .lyrics-stage-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(circle at 60% 40%, rgba(18, 25, 45, 0.4) 0%, transparent 80%);
+    }
+
+    .stage-ambient-grid {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .stage-status-bar {
+      height: 38px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-dim);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      z-index: 10;
+    }
+    .stage-status-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .stage-dot-pulse {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--glow-success);
+      box-shadow: 0 0 8px var(--glow-success);
+      animation: ledPulse 1.8s infinite;
+    }
+
+    @keyframes ledPulse {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* KTV 歌词排版 (去发光，纯净多彩慢速渐变) */
+    .lyrics-scroll-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      gap: 22px;
+      z-index: 10;
+      position: relative;
+      overflow-y: auto;
+    }
+
+    .lyric-item {
+      font-size: 26px;
+      font-weight: 500;
+      color: #616e89;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      max-width: 80%;
+      line-height: 1.4;
+    }
+    .lyric-item:hover {
+      color: #9cb1d6;
+      transform: scale(1.02);
+    }
+    .lyric-item.dim-far {
+      opacity: 0.25;
+      font-size: 22px;
+    }
+    .lyric-item.dim-near {
+      opacity: 0.55;
+      font-size: 24px;
+      color: #7b8ca8;
+    }
+
+    /* 主歌词行：去掉外发光，只留颜色慢慢多彩渐变！ */
+    .lyric-item.hero-active {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      padding: 6px 16px;
+      border-radius: 12px;
+      transform: scale(1.06);
+      text-shadow: none !important;
+      filter: none !important;
+      box-shadow: none !important;
+      background: linear-gradient(90deg, #00f2fe 0%, #4facfe 20%, #a855f7 40%, #ec4899 60%, #fbbf24 80%, #00f2fe 100%);
+      background-size: 250% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: slowMulticolorFlow 12s linear infinite;
+    }
+
+    @keyframes slowMulticolorFlow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 250% 50%; }
+    }
+
+    /* ========================================================
+       右侧底部控制台 (BOTTOM CONTROL DECK)
+       ======================================================== */
+    .playback-bottom-dock {
+      background: rgba(12, 15, 26, 0.96);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      z-index: 30;
+      flex-shrink: 0;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    /* 上层: 原版细密对称波形 (WaveformSlider) + 颜色幻彩渐变 */
+    .waveform-slider-wrap {
+      width: 100%;
+      height: 48px;
+      position: relative;
+      background: rgba(0, 0, 0, 0.35);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .waveform-canvas {
+      width: 100%;
+      height: 42px;
+      display: block;
+    }
+    .waveform-hover-time {
+      position: absolute;
+      top: -24px;
+      transform: translateX(-50%);
+      padding: 2px 7px;
+      background: #000;
+      border: 1px solid var(--border-glow);
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--glow-primary);
+      display: none;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* 下层主控行: 
+       [左] 曲目信息 + 紧随其后的竖排模式选择 (普通模式 / 机架模式)
+       [正中] 大号主控播放/暂停键 (绝对居中)
+       [右] 4连单选滑块 (AI跟唱/AI唱歌/自唱/聊天) 
+    */
+    .dock-controls-row {
+      height: 94px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* ----------------------------------------------------
+       1. 左区: 歌曲信息 + 紧随其后的竖排模式选择 (普通模式 / 机架模式)
+       ---------------------------------------------------- */
+    .dock-left-meta-pane {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 260px;
+      max-width: 380px;
+      flex-shrink: 0;
+    }
+
+    /* 歌曲封面与曲目信息 */
+    .dock-track-sub-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }
+    .track-cover-mini {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1b2438, #0e1322);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--glow-primary);
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    }
+    .track-meta-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      overflow: hidden;
+    }
+    .track-title-time {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .track-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+    .track-time {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .track-mic-status {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .mic-led-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--glow-success);
+      box-shadow: 0 0 6px var(--glow-success);
+    }
+
+    /* 模式提示标签 (随模式实时切换) */
+    .dock-mode-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1.5px 6px;
+      border-radius: 6px;
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      color: var(--glow-primary);
+      margin-left: 6px;
+      letter-spacing: 0.3px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .dock-mode-tag:hover {
+      box-shadow: 0 0 10px var(--glow-primary);
+      filter: brightness(1.2);
+    }
+    .dock-mode-tag.normal {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.16);
+      color: var(--text-muted);
+    }
+    .dock-mode-tag.normal:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+
+    /* ----------------------------------------------------
+       2. 屏幕右侧控制组合栈: 音量调节 + 模式切换 + 直播歌词
+       ---------------------------------------------------- */
+    .stage-right-control-stack {
+      position: absolute;
+      top: 48px;
+      right: 24px;
+      bottom: 16px; /* 整个右侧控制栈与音乐创作窗口底部对齐 */
+      width: 284px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 25;
+    }
+
+    .stage-volume-panel {
+      position: relative;
+      width: 100%;
+      background: rgba(14, 18, 32, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 14px 10px 14px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 1px rgba(255, 255, 255, 0.1);
+      transition: all 0.25s ease;
+    }
+    .stage-volume-panel:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55), 0 0 14px rgba(0, 242, 254, 0.12);
+    }
+
+    /* 音量面板下方的并排子控制区 (模式调整 + 直播歌词设置) */
+    .stage-sub-controls {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+    .sub-control-card {
+      flex: 1;
+      height: 30px; /* 按钮高度减少1/3 (原44px降至30px) */
+      background: rgba(14, 18, 32, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      position: relative;
+      transition: all 0.25s ease;
+      overflow: hidden;
+    }
+    .sub-control-card:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 242, 254, 0.12);
+    }
+
+    /* 模式切换滑块胶囊 (普通模式 vs 机架模式) */
+    .mode-switch-capsule {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      padding: 2.5px;
+      position: relative;
+      background: rgba(0, 0, 0, 0.35);
+      cursor: pointer;
+      user-select: none;
+    }
+    .mode-slider-pill {
+      position: absolute;
+      top: 2.5px;
+      bottom: 2.5px;
+      left: calc(50% + 0px); /* 默认机架模式 (右侧) */
+      width: calc(50% - 2.5px);
+      border-radius: 6px;
+      background: var(--accent-gradient);
+      box-shadow: 0 1px 6px rgba(0, 242, 254, 0.35);
+      transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1;
+    }
+    .mode-slider-pill.left-pos {
+      left: 2.5px; /* 普通模式 (左侧) */
+    }
+    .mode-opt-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      z-index: 2;
+      transition: color 0.2s ease;
+      gap: 3px;
+      line-height: 1;
+    }
+    .mode-opt-btn.active {
+      color: #000;
+    }
+
+    /* 直播歌词控制卡片 (开关 + 齿轮) */
+    .live-lyrics-subcard {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.35);
+    }
+    .live-lyrics-subcard .sub-lyrics-toggle {
+      flex: 1;
+      height: 100%;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .live-lyrics-subcard.active .sub-lyrics-toggle {
+      color: var(--glow-primary);
+      background: rgba(0, 242, 254, 0.15);
+      text-shadow: 0 0 8px rgba(0, 242, 254, 0.5);
+    }
+    .live-lyrics-subcard .sub-lyrics-gear {
+      width: 28px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      border: none;
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .live-lyrics-subcard .sub-lyrics-gear:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* --------------------------------------------------------
+       音乐搜索模块卡片样式 (左侧歌单底部占位)
+       -------------------------------------------------------- */
+    .music-search-placeholder-card {
+      background: rgba(14, 18, 32, 0.9);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      transition: all 0.25s ease;
+      height: 180px; /* 固定高度，不随窗口增高，底部固定 */
+      min-height: 180px;
+      max-height: 180px;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      justify-content: space-between;
+    }
+    .music-search-placeholder-card:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 14px rgba(0, 242, 254, 0.15);
+    }
+    .card-head-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-icon {
+      font-size: 14px;
+    }
+    .card-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+    .card-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1.5px 7px;
+      border-radius: 6px;
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      color: var(--glow-primary);
+    }
+    [data-theme="aurora"] .card-badge {
+      background: rgba(236, 72, 153, 0.12);
+      border-color: rgba(236, 72, 153, 0.3);
+      color: #ec4899;
+    }
+    [data-theme="gold"] .card-badge {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #f59e0b;
+    }
+    .music-search-box {
+      display: flex;
+      gap: 6px;
+    }
+    .music-search-input {
+      flex: 1;
+      height: 32px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 0 10px;
+      color: var(--text-main);
+      font-size: 11.5px;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .music-search-input:focus {
+      border-color: var(--glow-primary);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+    }
+    .music-search-btn {
+      padding: 0 12px;
+      height: 32px;
+      background: var(--accent-gradient);
+      border: none;
+      border-radius: 6px;
+      color: #000;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 10px rgba(0, 242, 254, 0.25);
+    }
+    .music-search-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(0, 242, 254, 0.4);
+    }
+    .search-quick-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .quick-tag {
+      font-size: 10px;
+      padding: 2.5px 7px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .quick-tag:hover {
+      background: rgba(0, 242, 254, 0.12);
+      border-color: rgba(0, 242, 254, 0.3);
+      color: var(--text-main);
+    }
+    .search-hint-box {
+      font-size: 10px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      line-height: 1.35;
+      padding-top: 4px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* --------------------------------------------------------
+       音乐创作模块卡片样式 (右侧控制栈底部占位，高度提升并底部对齐)
+       -------------------------------------------------------- */
+    .music-create-placeholder-card {
+      background: rgba(14, 18, 32, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 12px 14px 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+      transition: all 0.25s ease;
+      height: 270px; /* 固定高度，不要随窗口增高 */
+      min-height: 270px;
+      max-height: 270px;
+      flex-shrink: 0;
+      margin-top: auto; /* 底部固定对齐 */
+      box-sizing: border-box;
+      justify-content: space-between;
+    }
+    .music-create-placeholder-card:hover {
+      border-color: var(--border-glow);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55), 0 0 14px rgba(0, 242, 254, 0.12);
+    }
+    .create-tab-row {
+      display: flex;
+      gap: 5px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 3px;
+      border-radius: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .create-tab-btn {
+      flex: 1;
+      height: 25px;
+      font-size: 10.5px;
+      font-weight: 600;
+      border: none;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .create-tab-btn:hover {
+      color: var(--text-main);
+    }
+    .create-tab-btn.active {
+      color: #000;
+      background: var(--accent-gradient);
+      box-shadow: 0 2px 8px rgba(0, 242, 254, 0.25);
+    }
+    .create-prompt-wrap {
+      width: 100%;
+    }
+    .create-prompt-input {
+      width: 100%;
+      height: 72px; /* 默认3行高度 (3 * 20px line-height + 12px padding) */
+      min-height: 72px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: 7px;
+      padding: 8px 10px;
+      color: var(--text-main);
+      font-size: 11.5px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      transition: all 0.2s ease;
+      line-height: 1.45;
+    }
+    .create-prompt-input:focus {
+      border-color: var(--glow-primary);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+    }
+    
+    @keyframes focusPulseGlow {
+      0% { box-shadow: 0 0 0 rgba(0, 242, 254, 0); border-color: var(--border-subtle); }
+      50% { box-shadow: 0 0 28px rgba(0, 242, 254, 0.6), 0 0 12px var(--glow-primary); border-color: var(--glow-primary); transform: scale(1.015); }
+      100% { box-shadow: 0 0 0 rgba(0, 242, 254, 0); border-color: var(--border-glow); transform: scale(1); }
+    }
+    .nav-focus-highlight {
+      animation: focusPulseGlow 1.4s ease forwards !important;
+    }
+    .create-style-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .chip-item {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .chip-item:hover {
+      background: rgba(0, 242, 254, 0.12);
+      border-color: rgba(0, 242, 254, 0.25);
+      color: var(--text-main);
+    }
+    .create-action-btn {
+      width: 100%;
+      height: 32px;
+      background: var(--accent-gradient);
+      border: none;
+      border-radius: 7px;
+      color: #000;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 3px 12px rgba(0, 242, 254, 0.3);
+      transition: all 0.2s ease;
+    }
+    .create-action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 16px rgba(0, 242, 254, 0.45);
+    }
+    .create-hint-row {
+      font-size: 9.5px;
+      color: var(--text-dim);
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* 设置面板中的机架插件管理卡片样式 */
+    .settings-section-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .settings-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .settings-card-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-badge-ok {
+      font-size: 10px;
+      color: var(--glow-success);
+      font-weight: 700;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      padding: 1px 6px;
+      border-radius: 8px;
+    }
+    .settings-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .settings-info-line {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .code-path {
+      color: var(--glow-primary);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+    .stage-vol-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .stage-vol-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      letter-spacing: 0.5px;
+    }
+    .stage-vol-badge {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--glow-primary);
+      background: rgba(0, 242, 254, 0.1);
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+    [data-theme="aurora"] .stage-vol-badge {
+      color: var(--glow-secondary);
+      background: rgba(236, 72, 153, 0.1);
+      border-color: rgba(236, 72, 153, 0.25);
+    }
+    [data-theme="gold"] .stage-vol-badge {
+      color: var(--glow-warning);
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.25);
+    }
+
+    .volume-strips-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100%;
+    }
+    .volume-row-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+    .volume-row-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      width: 62px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .volume-slider-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    /* 中间 100% 刻度中点标记 */
+    .vol-center-tick {
+      position: absolute;
+      left: 50%;
+      top: -3px;
+      bottom: -3px;
+      width: 1.5px;
+      background: rgba(255, 255, 255, 0.35);
+      border-radius: 1px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .volume-range-input {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.12);
+      outline: none;
+      cursor: pointer;
+    }
+    .volume-range-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid var(--glow-primary);
+      box-shadow: 0 0 6px var(--glow-primary);
+      cursor: pointer;
+      position: relative;
+      z-index: 3;
+      transition: transform 0.12s ease;
+    }
+    .volume-range-input::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+    }
+    .volume-row-val {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #fff;
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+      font-weight: 600;
+    }
+    .volume-row-val.boost {
+      color: var(--glow-warning);
+    }
+
+    /* ----------------------------------------------------
+       3. 正中央: 大号播放/暂停按键 (绝对居中)
+       ---------------------------------------------------- */
+    .dock-center-transport {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+    .main-play-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #000;
+      font-size: 20px;
+      box-shadow: 0 0 16px var(--glow-primary), 0 0 32px rgba(0, 242, 254, 0.25);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .main-play-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 24px var(--glow-primary), 0 0 45px rgba(0, 242, 254, 0.4);
+    }
+    .main-play-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* ----------------------------------------------------
+       4. 右区: 4连单选滑块 (AI跟唱, AI唱歌, 自唱, 聊天)
+       ---------------------------------------------------- */
+    .dock-right-quad-pane {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      width: 320px;
+      flex-shrink: 0;
+    }
+
+    /* 4连连体单选滑块 (Quad Segmented Slider) */
+    .quad-segmented-slider {
+      width: 310px;
+      height: 32px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid var(--border-subtle);
+      position: relative;
+      display: flex;
+      padding: 2px;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+    }
+    .quad-slider-pill {
+      position: absolute;
+      top: 2px;
+      bottom: 2px;
+      width: calc(25% - 2px);
+      border-radius: 13px;
+      background: var(--accent-gradient);
+      box-shadow: 0 2px 8px rgba(0, 242, 254, 0.35);
+      transition: left 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      left: 2px; /* 默认激活第1个：AI跟唱 */
+    }
+    .quad-segment-opt {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      z-index: 2;
+      transition: color 0.2s ease;
+      white-space: nowrap;
+    }
+    .quad-segment-opt.active {
+      color: #000;
+    }
+
+    /* ========================================================
+       TAB 2: 训练处理 (TASKS & TRAINING)
+       ======================================================== */
+    .training-view-wrap {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      backdrop-filter: blur(12px);
+    }
+    .metric-card-title {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .metric-card-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .tasks-table-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tasks-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .tasks-table th {
+      text-align: left;
+      padding: 10px 12px;
+      color: var(--text-dim);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .tasks-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .status-badge.success {
+      background: rgba(0, 245, 160, 0.12);
+      color: var(--glow-success);
+      border: 1px solid rgba(0, 245, 160, 0.3);
+    }
+    .status-badge.running {
+      background: rgba(0, 242, 254, 0.12);
+      color: var(--glow-primary);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+    }
+
+    /* ========================================================
+       TAB 3: 我的 (PROFILE & PRICING & SETTINGS)
+       ======================================================== */
+    .profile-view-wrap {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .profile-hero-card {
+      background: linear-gradient(135deg, rgba(22, 28, 48, 0.7), rgba(12, 16, 28, 0.9));
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--glass-shadow);
+    }
+    .profile-user-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .profile-big-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--accent-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      color: #000;
+      box-shadow: 0 0 20px var(--glow-primary);
+    }
+    .profile-info-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .profile-info-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .pricing-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .pricing-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+    .pricing-card:hover {
+      border-color: var(--glow-primary);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 24px rgba(0, 242, 254, 0.15);
+    }
+    .pricing-card.popular {
+      border-color: var(--glow-primary);
+      background: linear-gradient(180deg, rgba(0, 242, 254, 0.08) 0%, rgba(14, 18, 30, 0.8) 100%);
+    }
+
+    /* 独立登录与注册门户 (LOGIN PORTAL) */
+    .view-login-portal {
+      position: absolute;
+      inset: 0;
+      z-index: 500;
+      display: none;
+      background: rgba(7, 9, 14, 0.95);
+      backdrop-filter: blur(36px);
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+    .view-login-portal.active {
+      display: flex;
+    }
+
+    .login-container-card {
+      width: 880px;
+      height: 520px;
+      border-radius: 20px;
+      background: rgba(16, 20, 36, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 242, 254, 0.15);
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+    .login-left-brand {
+      flex: 1;
+      padding: 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: radial-gradient(circle at 20% 20%, rgba(0, 242, 254, 0.12), transparent 70%);
+      border-right: 1px solid var(--border-subtle);
+    }
+    .login-right-form {
+      width: 400px;
+      padding: 44px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+      background: rgba(12, 16, 28, 0.6);
+    }
+
+    /* 悬浮直播歌词窗口 */
+    .floating-lyrics-overlay {
+      position: fixed;
+      top: 90px;
+      right: 40px;
+      width: 480px;
+      background: rgba(14, 18, 32, 0.9);
+      border: 1px solid var(--glow-primary);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 242, 254, 0.3);
+      border-radius: 12px;
+      padding: 16px 20px;
+      z-index: 300;
+      backdrop-filter: blur(20px);
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      cursor: move;
+    }
+    .floating-lyrics-overlay.show {
+      display: flex;
+    }
+
+    /* 模态弹窗 */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-backdrop.show {
+      display: flex;
+    }
+    .modal-dialog {
+      width: 460px;
+      background: #111524;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 242, 254, 0.15);
+    }
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .modal-close-x {
+      font-size: 16px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .modal-close-x:hover { color: #fff; }
+
+    /* Toast Notification */
+    .toast-banner {
+      position: fixed;
+      top: 64px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      opacity: 0;
+      pointer-events: none;
+      background: rgba(14, 19, 34, 0.95);
+      border: 1px solid var(--glow-primary);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 242, 254, 0.25);
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 2000;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast-banner.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ========================================================
+       青玄 AI 智能改词工坊 (ALT-LYRICS STUDIO & REPLACEMENT)
+       ======================================================== */
+    .dock-alt-control-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    .dock-alt-toggle-btn {
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--text-muted);
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+    .dock-alt-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .dock-alt-toggle-btn.active {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(127, 0, 255, 0.3) 100%);
+      border-color: var(--glow-primary);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(0, 242, 254, 0.35);
+    }
+    [data-theme="aurora"] .dock-alt-toggle-btn.active {
+      background: linear-gradient(135deg, rgba(236, 72, 153, 0.25) 0%, rgba(168, 85, 247, 0.3) 100%);
+      border-color: #ec4899;
+      box-shadow: 0 0 14px rgba(236, 72, 153, 0.35);
+    }
+    [data-theme="gold"] .dock-alt-toggle-btn.active {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(234, 88, 12, 0.3) 100%);
+      border-color: #f59e0b;
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.35);
+    }
+
+    .alt-glow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      transition: all 0.2s ease;
+    }
+    .dock-alt-toggle-btn.active .alt-glow-dot {
+      background: var(--glow-success);
+      box-shadow: 0 0 8px var(--glow-success);
+      animation: altDotPulse 1.6s infinite alternate ease-in-out;
+    }
+    @keyframes altDotPulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      100% { transform: scale(1.3); opacity: 1; }
+    }
+
+    .dock-alt-open-btn {
+      height: 22px;
+      padding: 0 7px;
+      border-radius: 6px;
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid rgba(0, 242, 254, 0.35);
+      color: var(--glow-primary);
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+    }
+    .dock-alt-open-btn:hover {
+      background: var(--accent-gradient);
+      color: #000;
+      border-color: transparent;
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+    }
+    [data-theme="aurora"] .dock-alt-open-btn {
+      background: rgba(236, 72, 153, 0.12);
+      border-color: rgba(236, 72, 153, 0.35);
+      color: #ec4899;
+    }
+    [data-theme="gold"] .dock-alt-open-btn {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: #f59e0b;
+    }
+
+    /* 歌曲列表中的改词分轨标签 */
+    .song-alt-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(127, 0, 255, 0.18);
+      border: 1px solid rgba(127, 0, 255, 0.4);
+      color: #c084fc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-left: 6px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .song-alt-badge:hover {
+      background: rgba(127, 0, 255, 0.35);
+      color: #fff;
+      box-shadow: 0 0 8px rgba(127, 0, 255, 0.4);
+    }
+    .song-alt-badge.active {
+      background: rgba(0, 242, 254, 0.2);
+      border-color: var(--glow-primary);
+      color: var(--glow-primary);
+      box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+    }
+    [data-theme="aurora"] .song-alt-badge.active {
+      background: rgba(236, 72, 153, 0.2);
+      border-color: #ec4899;
+      color: #ec4899;
+    }
+    [data-theme="gold"] .song-alt-badge.active {
+      background: rgba(245, 158, 11, 0.2);
+      border-color: #f59e0b;
+      color: #f59e0b;
+    }
+
+    /* 大屏歌词中的改词标签与内联修改按键 */
+    .alt-hero-tag {
+      font-size: 15px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--accent-gradient);
+      color: #000 !important;
+      display: inline-block;
+      margin-right: 10px;
+      vertical-align: middle;
+      box-shadow: 0 0 14px rgba(0, 242, 254, 0.5);
+      letter-spacing: 0;
+      -webkit-text-fill-color: #000 !important;
+    }
+    .alt-lyric-edit-inline-btn {
+      font-size: 13px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      color: #fff !important;
+      cursor: pointer;
+      margin-left: 10px;
+      vertical-align: middle;
+      opacity: 0.85;
+      transition: all 0.2s ease;
+      -webkit-text-fill-color: #fff !important;
+    }
+    .alt-lyric-edit-inline-btn:hover {
+      opacity: 1;
+      background: rgba(0, 242, 254, 0.25);
+      border-color: var(--glow-primary);
+      transform: scale(1.05);
+    }
+
+    /* 改词工坊弹窗 Dialog */
+    .alt-studio-dialog {
+      width: 760px;
+      max-width: 95vw;
+      max-height: 92vh;
+      background: #0d1120;
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 242, 254, 0.18);
+      overflow-y: auto;
+      backdrop-filter: blur(28px);
+    }
+    .alt-studio-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+    .alt-studio-title-box {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .alt-studio-main-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .alt-studio-sub-title {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+    .alt-song-chip {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(0, 242, 254, 0.12);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      color: var(--glow-primary);
+    }
+
+    /* 改词工坊内容区块 */
+    .alt-section-box {
+      background: rgba(15, 20, 36, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .alt-step-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .alt-step-badge {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--glow-primary);
+      background: rgba(0, 242, 254, 0.1);
+      padding: 1.5px 7px;
+      border-radius: 4px;
+    }
+
+    /* 目标歌词选段滚行 */
+    .alt-line-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 115px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .alt-line-chip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 12px;
+    }
+    .alt-line-chip:hover {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .alt-line-chip.selected {
+      background: rgba(0, 242, 254, 0.12);
+      border-color: var(--glow-primary);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+    }
+    .alt-line-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .alt-line-chip.selected .alt-line-time {
+      color: var(--glow-secondary);
+      font-weight: 600;
+    }
+
+    /* 对比输入行 */
+    .alt-input-compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    .alt-input-col {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .alt-input-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .alt-orig-box {
+      height: 38px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      border-radius: 6px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      font-size: 13px;
+      color: #cfd8ea;
+      font-weight: 600;
+    }
+    .alt-replacement-input {
+      height: 38px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-glow);
+      border-radius: 6px;
+      padding: 0 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #fff;
+      outline: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 0 12px rgba(0, 242, 254, 0.15);
+    }
+    .alt-replacement-input:focus {
+      border-color: var(--glow-primary);
+      box-shadow: 0 0 16px rgba(0, 242, 254, 0.35);
+    }
+
+    /* 音节匹配指示条 */
+    .alt-meter-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba(0, 245, 160, 0.1);
+      border: 1px solid rgba(0, 245, 160, 0.3);
+      color: var(--glow-success);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .alt-meter-indicator.warn {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: var(--glow-warning);
+    }
+
+    /* 预设热门改词标签 */
+    .alt-preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .alt-preset-chip {
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .alt-preset-chip:hover {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: var(--glow-primary);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* 声学引擎参数三列布局 */
+    .alt-engine-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 12px;
+    }
+    .alt-engine-col {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .alt-engine-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .alt-select-input {
+      height: 30px;
+      background: rgba(12, 16, 28, 0.9);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      color: #fff;
+      font-size: 11px;
+      padding: 0 8px;
+      outline: none;
+    }
+    .alt-check-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    /* 可视化声波切片融合预览 */
+    .alt-slice-waveform-preview {
+      background: rgba(8, 10, 18, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .alt-slice-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .alt-slice-graphic {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .alt-slice-part {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10.5px;
+      font-weight: 700;
+      border-radius: 4px;
+      position: relative;
+    }
+    .part-pre {
+      width: 25%;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-dim);
+    }
+    .part-cross-in {
+      width: 10%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), rgba(0, 242, 254, 0.25));
+      color: var(--glow-primary);
+      font-size: 9px;
+    }
+    .part-core {
+      width: 30%;
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.3) 0%, rgba(127, 0, 255, 0.4) 100%);
+      border: 1px solid var(--glow-primary);
+      color: #fff;
+      box-shadow: 0 0 16px rgba(0, 242, 254, 0.3);
+    }
+    .part-cross-out {
+      width: 10%;
+      background: linear-gradient(90deg, rgba(127, 0, 255, 0.4), rgba(255, 255, 255, 0.06));
+      color: var(--glow-accent);
+      font-size: 9px;
+    }
+    .part-post {
+      width: 25%;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-dim);
+    }
+
+    /* 进度条与操作按钮行 */
+    .alt-progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .alt-progress-bar-bg {
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+    .alt-progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-gradient);
+      transition: width 0.2s ease;
+      box-shadow: 0 0 10px var(--glow-primary);
+    }
+    .alt-progress-label {
+      font-size: 11px;
+      color: var(--glow-primary);
+      text-align: center;
+    }
+
+    .alt-actions-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .alt-btn-secondary {
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .alt-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+    .alt-btn-primary {
+      height: 38px;
+      padding: 0 20px;
+      border-radius: 7px;
+      background: var(--accent-gradient);
+      border: none;
+      color: #000;
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 16px rgba(0, 242, 254, 0.35);
+      transition: all 0.2s ease;
+    }
+    .alt-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Background Spheres -->
+  <div class="ambient-glow orb-1"></div>
+  <div class="ambient-glow orb-2"></div>
+
+  <!-- Toast Notification -->
+  <div class="toast-banner" id="toastBanner">
+    <span id="toastIcon">✨</span>
+    <span id="toastMsg">提示信息</span>
+  </div>
+
+  <!-- Application Window -->
+  <div class="app-window">
+
+    <!-- ========================================================
+         TOP TITLEBAR & CORE NAVIGATION
+         ======================================================== -->
+    <div class="titlebar">
+      <div class="titlebar-left">
+        <div class="brand-section">
+          <div class="brand-logo">QX</div>
+          <div class="brand-name">
+            <span>青玄 AI</span>
+            <span class="badge-tag">方案 A 升级</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右上角工具按钮: 播放与更多功能 (移到右边) | 登录预览 | 点击展开主题配色 | 窗口操作按键 -->
+      <div class="titlebar-right">
+        <!-- 核心导航: 播放 + 音乐搜索 + 音乐创作 + 个人与管理下拉菜单 (已移至右边) -->
+        <div class="header-nav-tabs">
+          <button class="nav-tab-btn active" id="tabBtnPlayback" onclick="switchMainTab('playback')">
+            <span>🎵</span>
+            <span>播放</span>
+          </button>
+          <button class="nav-tab-btn" id="tabBtnMusicSearch" onclick="navToMusicSearch()" title="定位并展开音乐搜索曲库">
+            <span>🔍</span>
+            <span>音乐搜索</span>
+          </button>
+          <button class="nav-tab-btn" id="tabBtnMusicCreate" onclick="navToMusicCreate()" title="定位并展开音乐创作工坊">
+            <span>🎹</span>
+            <span>音乐创作</span>
+          </button>
+
+          <!-- 训练处理跟我的还有设置做成下拉菜单 -->
+          <div class="header-dropdown-wrap" id="headerDropdownWrap">
+            <button class="nav-tab-btn" onclick="toggleHeaderDropdown(event)" id="headerDropdownBtn" title="点击展开功能与个人中心">
+              <span id="dropdownTabIcon">👤</span>
+              <span id="dropdownTabLabel">更多功能</span>
+              <span style="font-size: 10px; margin-left: 2px; opacity: 0.8;">▾</span>
+            </button>
+            <div class="header-dropdown-menu" id="headerDropdownMenu">
+              <div class="dropdown-nav-item" id="dropItemMusicSearch" onclick="navToMusicSearch(); closeHeaderDropdown();">
+                <span class="d-icon">🔍</span>
+                <div class="d-info">
+                  <span class="d-title">音乐搜索</span>
+                  <span class="d-sub">全网伴奏与高品质云端曲库</span>
+                </div>
+              </div>
+              <div class="dropdown-nav-item" id="dropItemMusicCreate" onclick="navToMusicCreate(); closeHeaderDropdown();">
+                <span class="d-icon">🎹</span>
+                <div class="d-info">
+                  <span class="d-title">音乐创作</span>
+                  <span class="d-sub">AI 作词、编曲与声线重塑</span>
+                </div>
+              </div>
+              <div class="dropdown-sep"></div>
+              <div class="dropdown-nav-item" id="dropItemTraining" onclick="selectDropdownTab('training')">
+                <span class="d-icon">🧠</span>
+                <div class="d-info">
+                  <span class="d-title">训练处理</span>
+                  <span class="d-sub">声音模型微调与GPU任务</span>
+                </div>
+              </div>
+              <div class="dropdown-nav-item" id="dropItemProfile" onclick="selectDropdownTab('profile')">
+                <span class="d-icon">👤</span>
+                <div class="d-info">
+                  <span class="d-title">我的中心</span>
+                  <span class="d-sub">个人资料、点数与模型授权</span>
+                </div>
+              </div>
+              <div class="dropdown-sep"></div>
+              <div class="dropdown-nav-item" onclick="openSettingsModal(); closeHeaderDropdown();">
+                <span class="d-icon">⚙️</span>
+                <div class="d-info">
+                  <span class="d-title">系统设置</span>
+                  <span class="d-sub">快捷键绑定、机架插件安装</span>
+                </div>
+              </div>
+              <div class="dropdown-nav-item" onclick="openSupportModal(); closeHeaderDropdown();">
+                <span class="d-icon">💬</span>
+                <div class="d-info">
+                  <span class="d-title">官方微信客服</span>
+                  <span class="d-sub">点数充值、ASIO一对一答疑</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 登录界面快速查看按钮 -->
+        <button class="view-toggle-btn" onclick="toggleLoginView()" id="btnToggleLoginView">
+          🔐 查看登录界面
+        </button>
+
+        <!-- 主题配色点击展开选择 (3款主题) -->
+        <div class="theme-dropdown-container" id="themeDropdownContainer">
+          <button class="theme-menu-btn" onclick="toggleThemeDropdown(event)" id="themeMenuBtn" title="切换主题配色风格">
+            <span class="theme-current-dot td-cyan" id="themeCurrentDot"></span>
+            <span id="themeCurrentText">赛博霓虹</span>
+            <span style="font-size: 10px; opacity: 0.7;">▾</span>
+          </button>
+          <div class="theme-menu-popover" id="themeMenuPopover">
+            <div class="theme-menu-header">选择视觉主题风格</div>
+            <div class="theme-menu-option active" id="thmOptCyan" onclick="applyThemeFromMenu('cyan', '赛博霓虹')">
+              <div class="t-opt-left">
+                <span class="theme-preview-dot td-cyan"></span>
+                <div class="t-opt-meta">
+                  <span class="t-opt-name">赛博霓虹</span>
+                  <span class="t-opt-desc">Cyber Cyan (经典青蓝)</span>
+                </div>
+              </div>
+              <span class="t-opt-check">✓</span>
+            </div>
+            <div class="theme-menu-option" id="thmOptAurora" onclick="applyThemeFromMenu('aurora', '黑曜极光')">
+              <div class="t-opt-left">
+                <span class="theme-preview-dot td-aurora"></span>
+                <div class="t-opt-meta">
+                  <span class="t-opt-name">黑曜极光</span>
+                  <span class="t-opt-desc">Obsidian Aurora (魅惑玫粉)</span>
+                </div>
+              </div>
+              <span class="t-opt-check">✓</span>
+            </div>
+            <div class="theme-menu-option" id="thmOptGold" onclick="applyThemeFromMenu('gold', '鎏金至尊')">
+              <div class="t-opt-left">
+                <span class="theme-preview-dot td-gold"></span>
+                <div class="t-opt-meta">
+                  <span class="t-opt-name">鎏金至尊</span>
+                  <span class="t-opt-desc">Golden Luxury (高贵琥珀)</span>
+                </div>
+              </div>
+              <span class="t-opt-check">✓</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 窗口操作按键 -->
+        <div class="window-controls">
+          <div class="win-btn" onclick="showToast('已最小化到托盘', '🗕')">—</div>
+          <div class="win-btn" onclick="showToast('已切换窗口最大化', '🗖')">□</div>
+          <div class="win-btn close" onclick="showToast('青玄 AI 音效工坊运行中', '✕')">✕</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MAIN WORKSPACE CONTENT STACK
+         ======================================================== -->
+    <div class="main-workspace">
+
+      <!-- ========================================================
+           TAB 1: 播放 (PLAYBACK)
+           ======================================================== -->
+      <div class="tab-content active" id="tabViewPlayback">
+        <div class="playback-container">
+          
+          <!-- 左侧: 歌词与歌曲列表面板 (高度占满窗口高度！) -->
+          <!-- 左侧: 歌词与歌曲列表面板 (高度占满窗口高度！) -->
+          <div class="song-library-pane">
+            <!-- 搜索框 (置于原全部与收藏分类位置) -->
+            <div class="search-input-wrap">
+              <input type="text" class="song-search-input" id="songSearchInput" placeholder="搜索本地歌曲名..." oninput="handleSongSearch(this.value)">
+              <span class="search-icon-pos">🔍</span>
+            </div>
+
+            <!-- 歌曲列表 (垂直贯穿，已去掉左侧勾选框) -->
+            <div class="song-list-container" id="songListContainer">
+              <div class="song-item-row" data-title="爱江山更爱美人" onclick="selectSong(this, '爱江山更爱美人', '04:12')">
+                <div class="song-item-left">
+                  <span class="song-item-title">爱江山更爱美人</span>
+                </div>
+                <span class="song-group-tag" onclick="event.stopPropagation(); openSongMenu(this, '爱江山更爱美人')">默认</span>
+              </div>
+
+              <div class="song-item-row active" data-title="爱的代价" onclick="selectSong(this, '爱的代价', '03:28')">
+                <div class="song-item-left">
+                  <span class="song-item-title">爱的代价</span>
+                  <span class="song-alt-badge" id="badgeSongAltTrack" onclick="event.stopPropagation(); toggleAltLyricsTrack();" title="已合成专属 AI 改词分轨，点击开启/切换">✍️ 改词轨</span>
+                </div>
+                <span class="song-group-tag" onclick="event.stopPropagation(); openSongMenu(this, '爱的代价')">默认</span>
+              </div>
+
+              <div class="song-item-row" data-title="别怕我伤心" onclick="selectSong(this, '别怕我伤心', '04:45')">
+                <div class="song-item-left">
+                  <span class="song-item-title">别怕我伤心</span>
+                </div>
+                <span class="song-group-tag" onclick="event.stopPropagation(); openSongMenu(this, '别怕我伤心')">默认</span>
+              </div>
+
+              <div class="song-item-row" data-title="背叛情歌 (烟嗓版)" onclick="selectSong(this, '背叛情歌 (烟嗓版)', '03:55')">
+                <div class="song-item-left">
+                  <span class="song-item-title">背叛情歌 (烟嗓版)</span>
+                </div>
+                <span class="song-group-tag" onclick="event.stopPropagation(); openSongMenu(this, '背叛情歌 (烟嗓版)')">默认</span>
+              </div>
+
+              <div class="song-item-row" data-title="当爱已成往事" onclick="selectSong(this, '当爱已成往事', '04:38')">
+                <div class="song-item-left">
+                  <span class="song-item-title">当爱已成往事</span>
+                </div>
+                <span class="song-group-tag" onclick="event.stopPropagation(); openSongMenu(this, '当爱已成往事')">默认</span>
+              </div>
+            </div>
+
+            <!-- 音乐搜索模块占位 (如图二位置) -->
+            <div class="music-search-placeholder-card" id="musicSearchCard">
+              <div class="card-head-row">
+                <div class="card-title-group">
+                  <span class="card-icon">🔍</span>
+                  <span class="card-title">音乐搜索</span>
+                </div>
+                <span class="card-badge">全网伴奏库</span>
+              </div>
+              <div class="music-search-box">
+                <input type="text" class="music-search-input" id="cloudMusicSearchInput" placeholder="输入歌名/歌手全网找歌..." onkeydown="if(event.key==='Enter') doCloudMusicSearch()">
+                <button class="music-search-btn" onclick="doCloudMusicSearch()">搜索</button>
+              </div>
+              <div class="search-quick-tags">
+                <span class="quick-tag" onclick="quickFillSearch('抖音热歌')">🔥 抖音热歌</span>
+                <span class="quick-tag" onclick="quickFillSearch('经典老歌')">经典老歌</span>
+                <span class="quick-tag" onclick="quickFillSearch('KTV必唱')">KTV必唱</span>
+                <span class="quick-tag" onclick="quickFillSearch('流行金曲')">流行金曲</span>
+              </div>
+              <div class="search-hint-box">
+                <span>💡 支持网易云/QQ音乐无损解析，提取后自动加入列表</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧综合工作区 (歌词舞台 + 底部控制台) -->
+          <div class="playback-right-pane">
+            
+            <!-- 歌词舞台大屏 -->
+            <div class="lyrics-stage-pane">
+              <div class="stage-ambient-grid"></div>
+
+              <!-- 顶部声学状态条 -->
+              <div class="stage-status-bar">
+                <div class="stage-status-left">
+                  <span class="stage-dot-pulse"></span>
+                  <span>当前演绎：<strong id="stageCurrentSong" style="color: #fff;">爱的代价</strong></span>
+                  <span style="color: rgba(255,255,255,0.15);">|</span>
+                  <span>分离算法：HTDemucs 48kHz</span>
+                  <span style="color: rgba(255,255,255,0.15);">|</span>
+                  <span>变声模型：青玄定制 RVC</span>
+                </div>
+                <div style="font-family: 'JetBrains Mono', monospace;">
+                  <span>ASIO Buffer: 128 (2.9ms)</span>
+                </div>
+              </div>
+
+              <!-- 屏幕右侧控制组合栈: 1. 音量调节面板 + 2. 模式调整与直播歌词设置 -->
+              <div class="stage-right-control-stack">
+                <div class="stage-volume-panel" id="stageVolumePanel">
+                  <div class="stage-vol-header">
+                    <span class="stage-vol-title">🎚️ 音量调节</span>
+                    <span class="stage-vol-badge">基准100%</span>
+                  </div>
+                  <div class="volume-strips-group">
+                    <div class="volume-row-item">
+                      <span class="volume-row-label">混响麦克风</span>
+                      <div class="volume-slider-container">
+                        <div class="vol-center-tick" title="100% 原始参考点"></div>
+                        <input type="range" class="volume-range-input" id="volReverbMic" min="0" max="200" value="100" oninput="updateBiDirectionalVol('valReverbMic', this.value)">
+                      </div>
+                      <span class="volume-row-val" id="valReverbMic">100%</span>
+                    </div>
+
+                    <div class="volume-row-item">
+                      <span class="volume-row-label">普通麦克风</span>
+                      <div class="volume-slider-container">
+                        <div class="vol-center-tick" title="100% 原始参考点"></div>
+                        <input type="range" class="volume-range-input" id="volPlainMic" min="0" max="200" value="100" oninput="updateBiDirectionalVol('valPlainMic', this.value)">
+                      </div>
+                      <span class="volume-row-val" id="valPlainMic">100%</span>
+                    </div>
+
+                    <div class="volume-row-item">
+                      <span class="volume-row-label">AI音量</span>
+                      <div class="volume-slider-container">
+                        <div class="vol-center-tick" title="100% 原始参考点"></div>
+                        <input type="range" class="volume-range-input" id="volAiVoice" min="0" max="200" value="100" oninput="updateBiDirectionalVol('valAiVoice', this.value)">
+                      </div>
+                      <span class="volume-row-val" id="valAiVoice">100%</span>
+                    </div>
+
+                    <div class="volume-row-item">
+                      <span class="volume-row-label">伴奏音量</span>
+                      <div class="volume-slider-container">
+                        <div class="vol-center-tick" title="100% 原始参考点"></div>
+                        <input type="range" class="volume-range-input" id="volAccomp" min="0" max="200" value="100" oninput="updateBiDirectionalVol('valAccomp', this.value)">
+                      </div>
+                      <span class="volume-row-val" id="valAccomp">100%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 模式调整跟直播歌词设置放到音量调节下面 -->
+                <div class="stage-sub-controls">
+                  <!-- 左侧: 模式调整 (普通模式 vs 机架模式) -->
+                  <div class="sub-control-card" title="切换音频输入与监听模式">
+                    <div class="mode-switch-capsule" onclick="toggleRackModePill()">
+                      <div class="mode-slider-pill" id="modeSliderPill"></div>
+                      <div class="mode-opt-btn" id="btnModeNormal" onclick="event.stopPropagation(); setRackModeDirect(false)">
+                        <span>🔊 普通</span>
+                      </div>
+                      <div class="mode-opt-btn active" id="btnModeRack" onclick="event.stopPropagation(); setRackModeDirect(true)">
+                        <span>🎛️ 机架</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 右侧: 直播歌词开关与设置 -->
+                  <div class="sub-control-card">
+                    <div class="live-lyrics-subcard" id="liveLyricsSubcard">
+                      <button class="sub-lyrics-toggle" onclick="toggleLiveLyrics()" title="开启/关闭桌面置顶直播歌词">
+                        <span>☼ 直播歌词</span>
+                      </button>
+                      <button class="sub-lyrics-gear" onclick="openLiveLyricsSettings()" title="直播歌词透视与外观设置">⚙️</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. 音乐创作模块占位 (如图二位置) -->
+                <div class="music-create-placeholder-card" id="musicCreateCard">
+                  <div class="card-head-row">
+                    <div class="card-title-group">
+                      <span class="card-icon">🎹</span>
+                      <span class="card-title">音乐创作</span>
+                    </div>
+                    <span class="card-badge">AI Studio</span>
+                  </div>
+
+                  <div class="create-tab-row">
+                    <button class="create-tab-btn active" onclick="switchCreateSubTab(this, 'lyrics')">✍️ 灵感作词</button>
+                    <button class="create-tab-btn" onclick="switchCreateSubTab(this, 'compose')">🎸 伴奏编曲</button>
+                    <button class="create-tab-btn" onclick="switchCreateSubTab(this, 'altlyrics')">🎤 智能改词</button>
+                    <button class="create-tab-btn" onclick="switchCreateSubTab(this, 'timbre')">✨ 声线重塑</button>
+                  </div>
+
+                  <div class="create-prompt-wrap">
+                    <textarea class="create-prompt-input" id="createPromptInput" rows="3" placeholder="输入创意灵感，如：国风抒情、伤感慢摇、赛博迷幻..."></textarea>
+                  </div>
+
+                  <div class="create-style-chips">
+                    <span class="chip-item" onclick="insertPromptKeyword('国风雅韵')">国风雅韵</span>
+                    <span class="chip-item" onclick="insertPromptKeyword('深情慢摇')">深情慢摇</span>
+                    <span class="chip-item" onclick="insertPromptKeyword('烟嗓质感')">烟嗓质感</span>
+                    <span class="chip-item" onclick="insertPromptKeyword('清亮高音')">清亮高音</span>
+                  </div>
+
+                  <button class="create-action-btn" onclick="doTriggerMusicCreate()">
+                    <span>✨</span>
+                    <span>立即生成 AI 创作方案</span>
+                  </button>
+
+                  <div class="create-hint-row">
+                    <span>💡 一键驱动青玄声学大模型多轨伴奏与智能填词</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 歌词大屏 (去掉发光，只留平滑多彩渐变！) -->
+              <div class="lyrics-scroll-container" id="lyricsScrollContainer">
+                <div class="lyric-item dim-far" onclick="seekToLyric(1)">也曾黯然心碎</div>
+                <div class="lyric-item dim-near" onclick="seekToLyric(2)">这是爱的代价</div>
+                <div class="lyric-item dim-near" onclick="seekToLyric(3)">也曾伤心流泪</div>
+                <div class="lyric-item dim-near" onclick="seekToLyric(4)">也曾黯然心碎</div>
+                <div class="lyric-item hero-active" id="heroLyricLine" onclick="seekToLyric(5)">这是爱的代价</div>
+              </div>
+
+            </div>
+
+            <!-- ========================================================
+                 底部全宽控制台 (BOTTOM CONTROL DECK)
+                 - 1. 波形采用原版细密对称峰值线，支持幻彩渐变与平滑呼吸动态
+                 - 2. [左区] 歌曲信息位置固定，免受歌名长度影响挤压
+                 - 3. [正中] 大号主控播放/暂停键 (绝对水平居中)
+                 - 4. [右区] 4连单选滑块 (AI跟唱, AI唱歌, 自唱, 聊天)
+                 ======================================================== -->
+            <div class="playback-bottom-dock">
+              
+              <!-- 上层: 原版细密对称音频波形 (WaveformSlider) + 幻彩流光 -->
+              <div class="waveform-slider-wrap" id="waveformWrap" onclick="handleWaveformSeek(event)" onmousemove="handleWaveformHover(event)" onmouseleave="hideWaveformHover()">
+                <canvas id="waveformCanvas" class="waveform-canvas"></canvas>
+                <div class="waveform-hover-time" id="waveHoverTooltip">01:45</div>
+              </div>
+
+              <!-- 下层主控行 -->
+              <div class="dock-controls-row">
+                
+                <!-- 1. 左区: 歌曲信息 (位置固定，不受歌名长度挤压) -->
+                <div class="dock-left-meta-pane">
+                  <div class="dock-track-sub-row">
+                    <div class="track-cover-mini" id="dockCoverSquare">
+                      <span>🎵</span>
+                    </div>
+                    <div class="track-meta-wrap">
+                      <div class="track-title-time">
+                        <span class="track-title" id="dockSongTitle" title="爱的代价">爱的代价</span>
+                        <span class="dock-mode-tag" id="dockModeTag" onclick="toggleRackModePill()" title="点击切换普通/机架模式">机架模式</span>
+                        <div class="dock-alt-control-group">
+                          <button class="dock-alt-toggle-btn" id="dockAltTrackBtn" onclick="toggleAltLyricsTrack()" title="点击切换：原曲轨 ⇄ AI 改词分轨">
+                            <span class="alt-glow-dot"></span>
+                            <span id="dockAltTrackText">原曲轨</span>
+                          </button>
+                          <button class="dock-alt-open-btn" onclick="openAltLyricsStudio(activeSongName)" title="打开 AI 智能改词工坊">
+                            <span>✍️ 改词</span>
+                          </button>
+                        </div>
+                        <span class="track-time" id="dockTimeLabel">02:39 / 03:28</span>
+                      </div>
+                      <div class="track-mic-status" id="dockMicStatus">
+                        <span class="mic-led-indicator" id="micLed"></span>
+                        <span id="micReadoutText">机架麦克风输入 0.005</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. 正中央: 大号呼吸发光播放/暂停主控按键 (绝对水平居中) -->
+                <div class="dock-center-transport">
+                  <button class="main-play-btn" id="btnMainPlay" onclick="togglePlayPause()" title="播放 / 暂停 (空格键)">
+                    <span id="playBtnIcon">⏸</span>
+                  </button>
+                </div>
+
+                <!-- 4. 右区: 4连单选滑块 (AI跟唱, AI唱歌, 自唱, 聊天) -->
+                <div class="dock-right-quad-pane">
+                  <div class="quad-segmented-slider" id="quadModeSlider">
+                    <div class="quad-slider-pill" id="quadSliderPill"></div>
+                    <div class="quad-segment-opt active" id="quadOpt0" onclick="setQuadMode('follow', 0)">AI跟唱</div>
+                    <div class="quad-segment-opt" id="quadOpt1" onclick="setQuadMode('aising', 1)">AI唱歌</div>
+                    <div class="quad-segment-opt" id="quadOpt2" onclick="setQuadMode('self', 2)">自唱</div>
+                    <div class="quad-segment-opt" id="quadOpt3" onclick="setQuadMode('chat', 3)">聊天</div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================
+           TAB 2: 训练处理 (TASKS & TRAINING)
+           ======================================================== -->
+      <div class="tab-content" id="tabViewTraining">
+        <div class="training-view-wrap">
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="metric-card-title">队列中任务</div>
+              <div class="metric-card-val" style="color: var(--glow-secondary);">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-card-title">GPU 训练中</div>
+              <div class="metric-card-val" style="color: var(--glow-primary);">1</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-card-title">已完成任务</div>
+              <div class="metric-card-val" style="color: var(--glow-success);">23</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-card-title">RTX 显存占用</div>
+              <div class="metric-card-val" style="color: #fff;">5.4 / 12G</div>
+            </div>
+          </div>
+
+          <div class="tasks-table-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 15px; font-weight: 700; color: #fff;">任务处理大厅</span>
+              <button class="top-action-btn" onclick="openUploadSongModal()">+ 新建歌曲分离任务</button>
+            </div>
+            <table class="tasks-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>类型</th>
+                  <th>歌曲名称</th>
+                  <th>进度</th>
+                  <th>状态</th>
+                  <th>耗时</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>#23</td>
+                  <td>song_process</td>
+                  <td>爱的代价</td>
+                  <td>
+                    <div style="width: 120px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                      <div style="width: 100%; height: 100%; background: var(--glow-success);"></div>
+                    </div>
+                  </td>
+                  <td><span class="status-badge success">已完成 100%</span></td>
+                  <td>42s</td>
+                  <td>
+                    <button class="cat-pill" style="display: inline-flex; height: 26px; padding: 0 10px;" onclick="showToast('已加载到当前播放器', '🎵')">载入试听</button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>#24</td>
+                  <td>voice_train</td>
+                  <td>青玄定制甜美女声 #2</td>
+                  <td>
+                    <div style="width: 120px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                      <div style="width: 78%; height: 100%; background: var(--glow-primary);"></div>
+                    </div>
+                  </td>
+                  <td><span class="status-badge running">训练中 78%</span></td>
+                  <td>03:15</td>
+                  <td>
+                    <button class="cat-pill" style="display: inline-flex; height: 26px; padding: 0 10px;" onclick="showToast('查看 GPU Epoch 实时日志', '📊')">实时日志</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================
+           TAB 3: 我的 (PROFILE & PRICING & SETTINGS)
+           ======================================================== -->
+      <div class="tab-content" id="tabViewProfile">
+        <div class="profile-view-wrap">
+          <div class="profile-hero-card">
+            <div class="profile-user-left">
+              <div class="profile-big-avatar">QX</div>
+              <div>
+                <div class="profile-info-title">test (测试用户)</div>
+                <div class="profile-info-sub">绑定设备: RTX 3080 Ti · ASIO 低延迟驱动正常挂载</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 20px;">
+              <div style="text-align: right;">
+                <div style="font-size: 11px; color: var(--text-dim);">当前算力点数</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--glow-primary); font-family: 'JetBrains Mono', monospace;">480 点</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 11px; color: var(--text-dim);">今日免费额度</div>
+                <div style="font-size: 24px; font-weight: 800; color: var(--glow-success); font-family: 'JetBrains Mono', monospace;">4 / 5 次</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="font-size: 15px; font-weight: 700; color: #fff;">算力点数充值套餐</div>
+          <div class="pricing-cards-grid">
+            <div class="pricing-card">
+              <div style="font-size: 16px; font-weight: 700; color: #fff;">尝鲜体验包</div>
+              <div style="font-size: 28px; font-weight: 800; color: var(--glow-primary); font-family: 'JetBrains Mono', monospace;">¥19.9</div>
+              <div style="font-size: 12px; color: var(--text-muted);">包含 200 点算力 · 约可处理 20 首歌</div>
+              <button class="top-action-btn" style="margin-top: 10px; justify-content: center;" onclick="openSupportModal()">扫码充值</button>
+            </div>
+
+            <div class="pricing-card popular">
+              <div style="position: absolute; top: -10px; right: 14px; background: var(--accent-gradient); color: #000; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px;">最受欢迎</div>
+              <div style="font-size: 16px; font-weight: 700; color: #fff;">进阶创作者</div>
+              <div style="font-size: 28px; font-weight: 800; color: var(--glow-primary); font-family: 'JetBrains Mono', monospace;">¥99.0</div>
+              <div style="font-size: 12px; color: var(--text-muted);">包含 1200 点算力 · 包含 2 次模型克隆</div>
+              <button class="top-action-btn" style="margin-top: 10px; justify-content: center; background: rgba(0,242,254,0.2); border-color: var(--glow-primary);" onclick="openSupportModal()">扫码充值</button>
+            </div>
+
+            <div class="pricing-card">
+              <div style="font-size: 16px; font-weight: 700; color: #fff;">至尊机架大咖</div>
+              <div style="font-size: 28px; font-weight: 800; color: var(--glow-primary); font-family: 'JetBrains Mono', monospace;">¥299.0</div>
+              <div style="font-size: 12px; color: var(--text-muted);">包含 4000 点算力 · 专属音频架构师一对一技术支持</div>
+              <button class="top-action-btn" style="margin-top: 10px; justify-content: center;" onclick="openSupportModal()">扫码充值</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- 独立登录与注册门户 (LOGIN PORTAL) -->
+  <div class="view-login-portal" id="viewLoginPortal">
+    <div class="login-container-card">
+      <div class="login-left-brand">
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <div class="brand-logo" style="width: 36px; height: 36px; font-size: 18px;">QX</div>
+            <div style="font-size: 18px; font-weight: 800; color: #fff;">青玄 AI 音效工坊</div>
+          </div>
+          <div style="font-size: 24px; font-weight: 800; line-height: 1.3; color: #fff; margin-bottom: 12px;">
+            次世代 AI 声学机架<br>
+            <span style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">2.9ms 极低延迟声学重塑</span>
+          </div>
+          <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+            ✓ 原生 ASIO 机架插件深度协同<br>
+            ✓ 本地 RVC 神经元人声音色零损推理<br>
+            ✓ HTDemucs 48kHz 高保真伴奏分离<br>
+            ✓ 每日赠送 5 次免费处理额度
+          </div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-dim);">
+          青玄科技 · 方案 A (PySide6 纯正原生无损升级)
+        </div>
+      </div>
+
+      <div class="login-right-form">
+        <div style="font-size: 18px; font-weight: 700; color: #fff;">欢迎回来</div>
+        <div style="font-size: 12px; color: var(--text-dim); margin-top: -8px;">请登录您的青玄专属音效工作台</div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 11px; color: var(--text-muted);">账号 / 手机号</label>
+          <input type="text" class="song-search-input" value="test" style="height: 40px;">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 11px; color: var(--text-muted);">密码</label>
+          <input type="password" class="song-search-input" value="123456" style="height: 40px;">
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+          <label style="display: flex; align-items: center; gap: 6px; color: var(--text-muted); cursor: pointer;">
+            <input type="checkbox" checked>
+            <span>记住密码</span>
+          </label>
+          <span style="color: var(--glow-primary); cursor: pointer;" onclick="showToast('请联系管理员微信重置', '🔑')">忘记密码?</span>
+        </div>
+
+        <button class="top-action-btn" style="height: 42px; justify-content: center; background: var(--accent-gradient); color: #000; font-weight: 800; font-size: 14px; border: none; box-shadow: 0 0 20px var(--glow-primary); margin-top: 6px;" onclick="doSimulatedLogin()">
+          立即登录进入工作台
+        </button>
+
+        <button class="cat-pill" style="height: 34px; margin-top: 4px;" onclick="toggleLoginView()">
+          ← 返回主工作台
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 悬浮直播歌词窗口 -->
+  <div class="floating-lyrics-overlay" id="floatingLyricsOverlay">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span style="font-size: 11px; color: var(--glow-primary); font-weight: 700;">☼ 青玄桌面置顶直播歌词</span>
+      <span style="cursor: pointer; color: var(--text-muted); font-size: 12px;" onclick="toggleLiveLyrics()">✕</span>
+    </div>
+    <div style="font-size: 18px; font-weight: 800; color: #fff; text-shadow: 0 0 10px rgba(0,242,254,0.6); text-align: center; padding: 10px 0;" id="floatingLyricText">
+      这是爱的代价
+    </div>
+  </div>
+
+  <!-- 模态弹窗 -->
+  <div class="modal-backdrop" id="modalLiveLyricsSettings" onclick="if(event.target===this)closeModal('modalLiveLyricsSettings')">
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <span>设置直播歌词显示选项</span>
+        <span class="modal-close-x" onclick="closeModal('modalLiveLyricsSettings')">✕</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px; font-size: 12px;">
+        <div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span style="color: var(--text-muted);">偏转透视角度</span>
+            <span style="color: #fff; font-family: 'JetBrains Mono', monospace;" id="lblAngle">0°</span>
+          </div>
+          <input type="range" class="volume-range-input" min="-45" max="45" value="0" oninput="document.getElementById('lblAngle').textContent = this.value + '°'">
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span style="color: var(--text-muted);">窗口宽度</span>
+            <span style="color: #fff; font-family: 'JetBrains Mono', monospace;" id="lblWidth">680 px</span>
+          </div>
+          <input type="range" class="volume-range-input" min="300" max="1200" value="680" oninput="document.getElementById('lblWidth').textContent = this.value + ' px'">
+        </div>
+      </div>
+      <button class="top-action-btn" style="margin-top: 8px; justify-content: center; background: rgba(0,242,254,0.15); border-color: var(--glow-primary);" onclick="closeModal('modalLiveLyricsSettings'); showToast('直播歌词参数已保存', '💾')">
+        保存并应用
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalRackPlugin" onclick="if(event.target===this)closeModal('modalRackPlugin')">
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <span>机架插件管理 (QXuanAI.vst3)</span>
+        <span class="modal-close-x" onclick="closeModal('modalRackPlugin')">✕</span>
+      </div>
+      <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+        当前宿主支持：Studio One, FL Studio, Cubase, Reaper<br>
+        安装路径：<code style="color: var(--glow-primary); background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">C:\Program Files\Common Files\VST3\QXuanAI.vst3</code><br>
+        ASIO 驱动状态：<span style="color: var(--glow-success); font-weight: 700;">● 正常就绪 (48kHz / 128smp / 2.9ms)</span>
+      </div>
+      <button class="top-action-btn" style="height: 38px; justify-content: center; background: var(--accent-gradient); color: #000; font-weight: 700;" onclick="showToast('QXuanAI.vst3 插件已成功重新注册！', '🚀'); closeModal('modalRackPlugin');">
+        ⚡ 一键安装 / 重装 QXuanAI.vst3
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalSongMenu" onclick="if(event.target===this)closeModal('modalSongMenu')">
+    <div class="modal-dialog" style="width: 320px;">
+      <div class="modal-head">
+        <span id="lblSongMenuTitle">歌曲操作</span>
+        <span class="modal-close-x" onclick="closeModal('modalSongMenu')">✕</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <button class="cat-pill" style="height: 38px; text-align: left; padding: 0 12px; justify-content: flex-start; color: var(--glow-primary); border-color: rgba(0, 242, 254, 0.4); background: rgba(0, 242, 254, 0.08); font-weight: 700;" onclick="openAltLyricsStudioFromMenu()">✍️ AI 智能改词工坊...</button>
+        <button class="cat-pill" style="height: 36px; text-align: left; padding: 0 12px; justify-content: flex-start;" onclick="showToast('已修改所属分组', '🏷️'); closeModal('modalSongMenu');">🏷️ 更换分组...</button>
+        <button class="cat-pill" style="height: 36px; text-align: left; padding: 0 12px; justify-content: flex-start;" onclick="showToast('已添加到收藏列表', '⭐'); closeModal('modalSongMenu');">⭐ 收藏歌曲</button>
+        <button class="cat-pill" style="height: 36px; text-align: left; padding: 0 12px; justify-content: flex-start;" onclick="showToast('已载入干声波形编辑器', '✂️'); closeModal('modalSongMenu');">✂️ 编辑干声</button>
+        <button class="cat-pill" style="height: 36px; text-align: left; padding: 0 12px; justify-content: flex-start; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="deleteCurrentSelectedSong(); closeModal('modalSongMenu');">🗑️ 从列表中删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       青玄 AI 智能改词工坊 (ALT-LYRICS STUDIO & REPLACEMENT MODAL)
+       ======================================================== -->
+  <div class="modal-backdrop" id="modalAltLyricsStudio" onclick="if(event.target===this)closeModal('modalAltLyricsStudio')">
+    <div class="alt-studio-dialog">
+      <!-- 头部栏 -->
+      <div class="alt-studio-head">
+        <div class="alt-studio-title-box">
+          <div class="alt-studio-main-title">
+            <span>✍️</span>
+            <span>青玄 AI 智能改词工坊</span>
+            <span class="alt-song-chip">🎵 当前歌曲: <strong id="altStudioSongName">爱的代价</strong></span>
+          </div>
+          <div class="alt-studio-sub-title">锁定原曲 F0 旋律走势与节拍 · 无感声学干声融接 · S-Curve 交叉淡化与 RMS 动态能量平衡</div>
+        </div>
+        <span class="modal-close-x" onclick="closeModal('modalAltLyricsStudio')">✕</span>
+      </div>
+
+      <!-- 1. 目标歌词选段 -->
+      <div class="alt-section-box">
+        <div class="alt-step-title">
+          <span>1. 选择要替换的歌词句 (时间切片)</span>
+          <span class="alt-step-badge">单句/多句声学分轨替换</span>
+        </div>
+        <div class="alt-line-selector" id="altLineSelector">
+          <div class="alt-line-chip" onclick="selectAltTargetLine(this, 1, '00:45 - 00:52', '还记得年少时的梦吗')">
+            <span>[00:45] 还记得年少时的梦吗</span>
+            <span class="alt-line-time">00:45 - 00:52 (9 音节)</span>
+          </div>
+          <div class="alt-line-chip" onclick="selectAltTargetLine(this, 2, '01:05 - 01:12', '也曾伤心流泪')">
+            <span>[01:05] 也曾伤心流泪</span>
+            <span class="alt-line-time">01:05 - 01:12 (6 音节)</span>
+          </div>
+          <div class="alt-line-chip" onclick="selectAltTargetLine(this, 3, '01:13 - 01:19', '也曾黯然心碎')">
+            <span>[01:13] 也曾黯然心碎</span>
+            <span class="alt-line-time">01:13 - 01:19 (6 音节)</span>
+          </div>
+          <div class="alt-line-chip selected" onclick="selectAltTargetLine(this, 4, '02:35 - 02:42', '这是爱的代价')">
+            <span>[02:35] 这是爱的代价</span>
+            <span class="alt-line-time">02:35 - 02:42 (6 音节 · 高潮句)</span>
+          </div>
+          <div class="alt-line-chip" onclick="selectAltTargetLine(this, 5, '02:43 - 02:52', '走吧 走吧 人总要学着自己长大')">
+            <span>[02:43] 走吧 走吧 人总要学着自己长大</span>
+            <span class="alt-line-time">02:43 - 02:52 (13 音节)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 歌词对比输入与实时音节检测 -->
+      <div class="alt-section-box">
+        <div class="alt-step-title">
+          <span>2. 录入替换新词 & 音节旋律对齐</span>
+          <span class="alt-step-badge" id="altOrigMeterBadge">原曲: 6 音节</span>
+        </div>
+        <div class="alt-input-compare-grid">
+          <div class="alt-input-col">
+            <div class="alt-input-label">
+              <span>原曲唱词 (原调旋律与呼吸点已锁定)</span>
+              <span id="lblOrigSyllables">6 字 / 6 音节</span>
+            </div>
+            <div class="alt-orig-box" id="altOrigSentenceBox">这是爱的代价</div>
+          </div>
+          <div class="alt-input-col">
+            <div class="alt-input-label">
+              <span>替换新词 (AI 智能填词合成)</span>
+              <span id="lblAltSyllables" style="color: var(--glow-primary); font-weight: 700;">6 字 / 6 音节</span>
+            </div>
+            <input type="text" class="alt-replacement-input" id="altReplacementInput" value="这是给榜一的谢礼" oninput="updateMeterMatch(this.value)" placeholder="输入想要替换的歌词...">
+          </div>
+        </div>
+
+        <!-- 音节与节拍匹配状态指示条 -->
+        <div class="alt-meter-indicator" id="altMeterIndicator">
+          <span class="m-icon">🎯</span>
+          <span id="altMeterText">音节匹配度 100% · 6 字对应原曲 6 音节，完美契合原曲旋律与节拍！</span>
+        </div>
+
+        <!-- 热门主播一键改词场景预设 -->
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">⚡ 一键套用直播热门改词模版：</div>
+        <div class="alt-preset-row">
+          <span class="alt-preset-chip" onclick="applyAltPreset('这是给榜一的谢礼')">🎁 感谢榜一 (给榜一的谢礼)</span>
+          <span class="alt-preset-chip" onclick="applyAltPreset('感谢大哥送的跑车')">🏎️ 感谢跑车 (送的跑车)</span>
+          <span class="alt-preset-chip" onclick="applyAltPreset('祝大哥生日快乐呀')">🎂 生日祝福 (生日快乐呀)</span>
+          <span class="alt-preset-chip" onclick="applyAltPreset('兜里掏不出俩钢镚')">🔥 搞笑整活 (掏不出俩钢镚)</span>
+          <span class="alt-preset-chip" onclick="applyAltPreset('感谢兄弟们的陪伴')">💖 粉丝互动 (兄弟们的陪伴)</span>
+          <span class="alt-preset-chip" onclick="applyAltPreset('对面的主播你别慌')">🍺 连麦PK (主播你别慌)</span>
+        </div>
+      </div>
+
+      <!-- 3. 声学融接与克隆底层配置 (SoundTrail 标准) -->
+      <div class="alt-section-box">
+        <div class="alt-step-title">
+          <span>3. 声学引擎与无感缝合算法配置 (SoundTrail 声学架构)</span>
+          <span class="alt-step-badge">F0 旋律保护 + RMS 能量对齐</span>
+        </div>
+        <div class="alt-engine-grid">
+          <div class="alt-engine-col">
+            <span class="alt-engine-label">🎤 声线克隆音色</span>
+            <select class="alt-select-input" id="altTimbreSelect">
+              <option value="clone" selected>● 原唱干声克隆 (推荐: 100% 原汁原味)</option>
+              <option value="female">○ 青玄·清澈空灵女声</option>
+              <option value="male">○ 青玄·磁性质感烟嗓</option>
+              <option value="custom">○ 主播专属微调声音模型</option>
+            </select>
+          </div>
+          <div class="alt-engine-col">
+            <span class="alt-engine-label">🎼 旋律与音高锁定</span>
+            <label class="alt-check-label">
+              <input type="checkbox" id="chkPitchLock" checked>
+              <span>锁定原曲 F0 旋律走势</span>
+            </label>
+            <div style="font-size: 10px; color: var(--text-dim);">保留原句音高曲线与颤音节拍</div>
+          </div>
+          <div class="alt-engine-col">
+            <span class="alt-engine-label">🎚️ 交叉淡化与 RMS 均衡</span>
+            <label class="alt-check-label">
+              <input type="checkbox" id="chkCrossfade" checked>
+              <span>120ms S-Curve 交叉淡化</span>
+            </label>
+            <div style="font-size: 10px; color: var(--glow-success);">RMS 能量自动对齐 (-14.0 LUFS)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. 可视化声波切片融合预览 -->
+      <div class="alt-slice-waveform-preview">
+        <div class="alt-slice-header">
+          <span>声波切片无感融合预览 (Sound Splicing Waveform)</span>
+          <span id="altSliceTimestamp">02:35.000 ~ 02:42.000 [7.00s]</span>
+        </div>
+        <div class="alt-slice-graphic">
+          <div class="alt-slice-part part-pre">原唱前导干声</div>
+          <div class="alt-slice-part part-cross-in">S-Curve 渐入</div>
+          <div class="alt-slice-part part-core" id="altSliceCoreText">✨ AI 改词: 这是给榜一的谢礼</div>
+          <div class="alt-slice-part part-cross-out">S-Curve 渐出</div>
+          <div class="alt-slice-part part-post">原唱后导干声</div>
+        </div>
+      </div>
+
+      <!-- 5. 进度条与操作按键 -->
+      <div class="alt-progress-wrap" id="altProgressWrap" style="display: none;">
+        <div class="alt-progress-bar-bg">
+          <div class="alt-progress-bar-fill" id="altProgressBar"></div>
+        </div>
+        <div class="alt-progress-label" id="altProgressLabel">青玄声学大模型正在进行干声音素对齐与声线融接...</div>
+      </div>
+
+      <div class="alt-actions-row">
+        <button class="alt-btn-secondary" onclick="auditionAltLyric()">
+          <span>🎧</span>
+          <span id="btnAuditionText">试听切片效果</span>
+        </button>
+        <button class="alt-btn-primary" onclick="generateAndSaveAltLyrics()">
+          <span>⚡</span>
+          <span>立即合成并载入改词分轨</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalAddCategory" onclick="if(event.target===this)closeModal('modalAddCategory')">
+    <div class="modal-dialog" style="width: 360px;">
+      <div class="modal-head">
+        <span>新建歌曲分组</span>
+        <span class="modal-close-x" onclick="closeModal('modalAddCategory')">✕</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 11px; color: var(--text-muted);">分组名称</label>
+        <input type="text" class="song-search-input" id="newCategoryName" placeholder="输入分组名称，如：古风、现场..." style="height: 38px;">
+      </div>
+      <button class="top-action-btn" style="height: 36px; justify-content: center; background: rgba(0,242,254,0.15); border-color: var(--glow-primary);" onclick="submitNewCategory()">创建并添加</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalUploadSong" onclick="if(event.target===this)closeModal('modalUploadSong')">
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <span>上传歌曲和歌词处理</span>
+        <span class="modal-close-x" onclick="closeModal('modalUploadSong')">✕</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12px;">
+        <div>
+          <span style="color: var(--text-muted);">歌曲音频文件 (*.wav, *.mp3, *.flac)</span>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <input type="text" class="song-search-input" value="C:\Music\爱的代价.mp3" readonly style="flex: 1;">
+            <button class="cat-pill" style="width: 80px;">浏览...</button>
+          </div>
+        </div>
+        <div>
+          <span style="color: var(--text-muted);">歌词文件 (*.lrc, *.txt)</span>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <input type="text" class="song-search-input" value="C:\Music\爱的代价.lrc" readonly style="flex: 1;">
+            <button class="cat-pill" style="width: 80px;">浏览...</button>
+          </div>
+        </div>
+      </div>
+      <button class="top-action-btn" style="margin-top: 10px; height: 38px; justify-content: center; background: var(--accent-gradient); color: #000; font-weight: 700;" onclick="showToast('歌曲上传成功，后台分离任务已创建！', '🚀'); closeModal('modalUploadSong');">开始上传并处理</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalSettings" onclick="if(event.target===this)closeModal('modalSettings')">
+    <div class="modal-dialog" style="width: 480px;">
+      <div class="modal-head">
+        <span>系统设置 (快捷键与机架插件)</span>
+        <span class="modal-close-x" onclick="closeModal('modalSettings')">✕</span>
+      </div>
+
+      <!-- 1. 机架插件管理 (改到设置里面) -->
+      <div class="settings-section-card">
+        <div class="settings-card-header">
+          <span class="settings-card-title">🎛️ 机架插件管理 (QXuanAI.vst3)</span>
+          <span class="status-badge-ok">● 正常就绪</span>
+        </div>
+        <div class="settings-card-body">
+          <div class="settings-info-line">
+            <span class="info-k">支持宿主：</span>
+            <span class="info-v">Studio One, FL Studio, Cubase, Reaper</span>
+          </div>
+          <div class="settings-info-line">
+            <span class="info-k">安装目录：</span>
+            <span class="info-v code-path">C:\Program Files\Common Files\VST3\QXuanAI.vst3</span>
+          </div>
+          <div class="settings-info-line">
+            <span class="info-k">ASIO 参数：</span>
+            <span class="info-v" style="color: var(--glow-success); font-family: 'JetBrains Mono', monospace;">48kHz / 128smp (2.9ms 极低延迟)</span>
+          </div>
+          <button class="top-action-btn" style="height: 38px; justify-content: center; background: var(--accent-gradient); color: #000; font-weight: 800; border: none; margin-top: 4px; box-shadow: 0 0 14px rgba(0, 242, 254, 0.25);" onclick="showToast('QXuanAI.vst3 插件已成功检测并重新安装注册！', '🚀')">
+            ⚡ 一键安装 / 重装 QXuanAI.vst3
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. 系统模式快捷键设置 -->
+      <div class="settings-section-card">
+        <div class="settings-card-header">
+          <span class="settings-card-title">⌨️ 模式与全局快捷键</span>
+          <span style="font-size: 10px; color: var(--text-muted);">单键绑定</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; font-size: 12px; margin-top: 2px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-muted);">AI跟唱</span>
+            <input type="text" class="song-search-input" value="F1" style="width: 60px; text-align: center; height: 28px;">
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-muted);">AI唱歌</span>
+            <input type="text" class="song-search-input" value="F2" style="width: 60px; text-align: center; height: 28px;">
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-muted);">自唱模式</span>
+            <input type="text" class="song-search-input" value="F3" style="width: 60px; text-align: center; height: 28px;">
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-muted);">聊天模式</span>
+            <input type="text" class="song-search-input" value="F4" style="width: 60px; text-align: center; height: 28px;">
+          </div>
+        </div>
+      </div>
+
+      <button class="top-action-btn" style="margin-top: 4px; height: 38px; justify-content: center; background: rgba(0,242,254,0.15); border-color: var(--glow-primary); font-weight: 700;" onclick="closeModal('modalSettings'); showToast('系统设置与快捷键已保存生效', '💾')">
+        保存并应用设置
+      </button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalSupport" onclick="if(event.target===this)closeModal('modalSupport')">
+    <div class="modal-dialog" style="width: 320px; align-items: center; text-align: center;">
+      <div class="modal-head" style="width: 100%;">
+        <span>官方微信客服</span>
+        <span class="modal-close-x" onclick="closeModal('modalSupport')">✕</span>
+      </div>
+      <div style="width: 180px; height: 180px; background: #fff; border-radius: 12px; padding: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0,242,254,0.3);">
+        <div style="width: 100%; height: 100%; border: 2px dashed #000; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 11px; color: #000; font-weight: 700;">
+          <span>扫码添加</span>
+          <span style="font-size: 14px; margin-top: 4px; color: #2563eb;">青玄音效客服</span>
+          <span style="font-size: 9px; color: #666; margin-top: 4px;">微信服务号</span>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">支持点数充值、模型定制<br>ASIO声卡调试一对一答疑</div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT 交互引擎 -->
+  <script>
+    let currentTheme = 'cyan';
+    let isPlaying = true;
+    let isRackMode = true;
+    let currentModeIndex = 0; // 0: follow, 1: aising, 2: self, 3: chat
+    let currentTimeSec = 159; // 02:39
+    let totalTimeSec = 208; // 03:28
+    let activeSongName = '爱的代价';
+    let liveLyricsVisible = false;
+    let micLevel = 0.005;
+    let waveAnimFrame = null;
+    let wavePhase = 0;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initOriginalWaveform();
+      startSimulatedMicMeter();
+    });
+
+    // 标签页切换 (播放 vs 训练处理 / 我的)
+    function switchMainTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      const btnPlay = document.getElementById('tabBtnPlayback');
+      const btnDrop = document.getElementById('headerDropdownBtn');
+      const dropLabel = document.getElementById('dropdownTabLabel');
+      const dropIcon = document.getElementById('dropdownTabIcon');
+
+      if (tabId === 'playback') {
+        if (btnPlay) btnPlay.classList.add('active');
+        if (btnDrop) btnDrop.classList.remove('active');
+        if (dropLabel) dropLabel.textContent = '更多功能';
+        if (dropIcon) dropIcon.textContent = '👤';
+        document.getElementById('tabViewPlayback').classList.add('active');
+      } else if (tabId === 'training') {
+        if (btnPlay) btnPlay.classList.remove('active');
+        if (btnDrop) btnDrop.classList.add('active');
+        if (dropLabel) dropLabel.textContent = '训练处理';
+        if (dropIcon) dropIcon.textContent = '🧠';
+        document.getElementById('tabViewTraining').classList.add('active');
+      } else if (tabId === 'profile') {
+        if (btnPlay) btnPlay.classList.remove('active');
+        if (btnDrop) btnDrop.classList.add('active');
+        if (dropLabel) dropLabel.textContent = '我的中心';
+        if (dropIcon) dropIcon.textContent = '👤';
+        document.getElementById('tabViewProfile').classList.add('active');
+      }
+    }
+
+    // 训练处理、我的、设置 下拉菜单控制
+    function toggleHeaderDropdown(event) {
+      if (event) event.stopPropagation();
+      const menu = document.getElementById('headerDropdownMenu');
+      const btn = document.getElementById('headerDropdownBtn');
+      closeThemeDropdown();
+      if (menu) {
+        menu.classList.toggle('show');
+        if (btn) btn.classList.toggle('active', menu.classList.contains('show') || document.getElementById('tabViewTraining').classList.contains('active') || document.getElementById('tabViewProfile').classList.contains('active'));
+      }
+    }
+
+    function closeHeaderDropdown() {
+      const menu = document.getElementById('headerDropdownMenu');
+      const btn = document.getElementById('headerDropdownBtn');
+      if (menu) menu.classList.remove('show');
+      if (btn && !document.getElementById('tabViewTraining').classList.contains('active') && !document.getElementById('tabViewProfile').classList.contains('active')) {
+        btn.classList.remove('active');
+      }
+    }
+
+    function selectDropdownTab(tabId) {
+      closeHeaderDropdown();
+      switchMainTab(tabId);
+      showToast(tabId === 'training' ? '已进入「训练处理」任务中心' : '已进入「我的」资产中心', '✨');
+    }
+
+    // 主题配色点击展开选择
+    function toggleThemeDropdown(event) {
+      if (event) event.stopPropagation();
+      const popover = document.getElementById('themeMenuPopover');
+      const btn = document.getElementById('themeMenuBtn');
+      closeHeaderDropdown();
+      if (popover) {
+        popover.classList.toggle('show');
+        if (btn) btn.classList.toggle('active', popover.classList.contains('show'));
+      }
+    }
+
+    function closeThemeDropdown() {
+      const popover = document.getElementById('themeMenuPopover');
+      const btn = document.getElementById('themeMenuBtn');
+      if (popover) popover.classList.remove('show');
+      if (btn) btn.classList.remove('active');
+    }
+
+    function applyThemeFromMenu(themeName, themeLabel) {
+      closeThemeDropdown();
+      currentTheme = themeName;
+      if (themeName === 'cyan') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', themeName);
+      }
+      
+      const dot = document.getElementById('themeCurrentDot');
+      if (dot) dot.className = 'theme-current-dot td-' + themeName;
+      const txt = document.getElementById('themeCurrentText');
+      if (txt) txt.textContent = themeLabel;
+
+      document.querySelectorAll('.theme-menu-option').forEach(opt => opt.classList.remove('active'));
+      const activeOpt = document.getElementById(themeName === 'cyan' ? 'thmOptCyan' : themeName === 'aurora' ? 'thmOptAurora' : 'thmOptGold');
+      if (activeOpt) activeOpt.classList.add('active');
+
+      showToast('主题已切换为：「' + themeLabel + '」', '🎨');
+    }
+
+    // 模式切换滑块 (普通模式 vs 机架模式，位于音量调节下方)
+    function toggleRackModePill() {
+      setRackModeDirect(!isRackMode);
+    }
+
+    function setRackModeDirect(enableRack) {
+      isRackMode = enableRack;
+      const pill = document.getElementById('modeSliderPill');
+      const btnNormal = document.getElementById('btnModeNormal');
+      const btnRack = document.getElementById('btnModeRack');
+      const micText = document.getElementById('micReadoutText');
+      const dockTag = document.getElementById('dockModeTag');
+
+      if (isRackMode) {
+        if (pill) pill.classList.remove('left-pos');
+        if (btnRack) btnRack.classList.add('active');
+        if (btnNormal) btnNormal.classList.remove('active');
+        if (micText) micText.textContent = '机架麦克风输入 ' + micLevel;
+        if (dockTag) {
+          dockTag.textContent = '机架模式';
+          dockTag.classList.remove('normal');
+        }
+        showToast('机架模式已开启，声音从机架宿主 (QXuanAI.vst3) 输出', '🎛️');
+      } else {
+        if (pill) pill.classList.add('left-pos');
+        if (btnNormal) btnNormal.classList.add('active');
+        if (btnRack) btnRack.classList.remove('active');
+        if (micText) micText.textContent = '普通模式已开启 (本机输出)';
+        if (dockTag) {
+          dockTag.textContent = '普通模式';
+          dockTag.classList.add('normal');
+        }
+        showToast('普通模式已开启，声音直接从本机声卡输出', '🔊');
+      }
+    }
+
+    // 4通道音量双向调节：中点100%，往左减小，往右可超100%
+    function updateBiDirectionalVol(targetId, val) {
+      const num = parseInt(val, 10);
+      const label = document.getElementById(targetId);
+      label.textContent = num + '%';
+      if (num > 100) {
+        label.classList.add('boost');
+      } else {
+        label.classList.remove('boost');
+      }
+    }
+
+    // 实时麦克风电平动态微扰
+    function startSimulatedMicMeter() {
+      setInterval(() => {
+        if (!isRackMode) return;
+        micLevel = (0.003 + Math.random() * 0.004).toFixed(3);
+        const micText = document.getElementById('micReadoutText');
+        if (micText) {
+          micText.textContent = '机架麦克风输入 ' + micLevel;
+        }
+      }, 350);
+    }
+
+    // ========================================================
+    // 原版细密对称声波 (DAW Slender Peaks) + 幻彩流光渐变动态
+    // ========================================================
+    const rawWaveformData = [];
+    const NUM_WAVE_BARS = 220; // 细密高保真采样点
+
+    // 生成平滑且富有音乐动态的真实声波曲线
+    for (let i = 0; i < NUM_WAVE_BARS; i++) {
+      const t = i / NUM_WAVE_BARS;
+      // 叠加多频段正弦与包络模拟歌曲高潮波形
+      const envelope = Math.sin(t * Math.PI) * 0.85 + 0.15;
+      const noise = (Math.sin(i * 0.38) * 0.3 + Math.cos(i * 0.85) * 0.25 + Math.sin(i * 1.7) * 0.15);
+      const val = Math.max(0.08, Math.min(0.95, envelope * (0.55 + Math.abs(noise))));
+      rawWaveformData.push(val);
+    }
+
+    let waveProgress = 62; // 当前播放进度 % (对应约 02:39)
+
+    function initOriginalWaveform() {
+      const canvas = document.getElementById('waveformCanvas');
+      if (!canvas) return;
+      resizeWaveformCanvas();
+      window.addEventListener('resize', resizeWaveformCanvas);
+      animateWaveform();
+    }
+
+    function resizeWaveformCanvas() {
+      const canvas = document.getElementById('waveformCanvas');
+      if (!canvas) return;
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = 42;
+    }
+
+    function animateWaveform() {
+      wavePhase += 0.04;
+      drawOriginalWaveform(waveProgress);
+      waveAnimFrame = requestAnimationFrame(animateWaveform);
+    }
+
+    function drawOriginalWaveform(progressPercent) {
+      const canvas = document.getElementById('waveformCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const centerY = h / 2;
+      const total = rawWaveformData.length;
+      const barSpacing = w / total;
+      const barWidth = 1.6; // 原版纤细线条
+      const playedIndex = Math.floor(total * (progressPercent / 100));
+
+      // 1. 中间水平参考基准线
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, centerY);
+      ctx.lineTo(w, centerY);
+      ctx.stroke();
+
+      // 2. 创建平滑移动的流光幻彩渐变 (移动的彩虹流光)
+      const grad = ctx.createLinearGradient(0, 0, w, 0);
+      const shift = (wavePhase * 0.08) % 1; // 缓慢位移
+      
+      if (currentTheme === 'aurora') {
+        grad.addColorStop(0, '#ec4899');
+        grad.addColorStop(0.33, '#a855f7');
+        grad.addColorStop(0.66, '#3b82f6');
+        grad.addColorStop(1, '#ec4899');
+      } else if (currentTheme === 'gold') {
+        grad.addColorStop(0, '#f59e0b');
+        grad.addColorStop(0.33, '#fbbf24');
+        grad.addColorStop(0.66, '#ea580c');
+        grad.addColorStop(1, '#f59e0b');
+      } else {
+        // 经典赛博幻彩：青 - 蓝 - 紫 - 粉 - 青
+        grad.addColorStop(0, '#00f2fe');
+        grad.addColorStop(0.25, '#4facfe');
+        grad.addColorStop(0.5, '#a855f7');
+        grad.addColorStop(0.75, '#ec4899');
+        grad.addColorStop(1, '#00f2fe');
+      }
+
+      // 3. 逐条绘制对称细密声波线
+      for (let i = 0; i < total; i++) {
+        let basePeak = rawWaveformData[i];
+        
+        // 播放中的微动态呼吸波动
+        if (isPlaying) {
+          const dynamicJitter = Math.sin(wavePhase * 2 + i * 0.15) * 0.04;
+          basePeak = Math.max(0.06, Math.min(0.98, basePeak + dynamicJitter));
+        }
+
+        const halfH = Math.max(2, (basePeak * (h - 6)) / 2);
+        const x = i * barSpacing + (barSpacing - barWidth) / 2;
+
+        if (i <= playedIndex) {
+          // 已播放部分：原版样式 + 幻彩流光渐变
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = barWidth;
+          ctx.lineCap = 'round';
+        } else {
+          // 未播放部分：原版清爽半透明灰
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+          ctx.lineWidth = barWidth;
+          ctx.lineCap = 'round';
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(x, centerY - halfH);
+        ctx.lineTo(x, centerY + halfH);
+        ctx.stroke();
+      }
+
+      // 4. 当前播放头细亮垂直指针线
+      const playheadX = w * (progressPercent / 100);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(playheadX, 4);
+      ctx.lineTo(playheadX, h - 4);
+      ctx.stroke();
+
+      // 播放指针小发光圆点
+      ctx.fillStyle = currentTheme === 'aurora' ? '#ec4899' : currentTheme === 'gold' ? '#f59e0b' : '#00f2fe';
+      ctx.beginPath();
+      ctx.arc(playheadX, centerY, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function handleWaveformSeek(event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      const percent = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
+      waveProgress = percent;
+      drawOriginalWaveform(percent);
+      const seekSec = Math.floor(totalTimeSec * (percent / 100));
+      const m = String(Math.floor(seekSec / 60)).padStart(2, '0');
+      const s = String(seekSec % 60).padStart(2, '0');
+      document.getElementById('dockTimeLabel').textContent = `${m}:${s} / 03:28`;
+      showToast(`已跳转播放进度至 ${m}:${s}`, '⏩');
+    }
+
+    function handleWaveformHover(event) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      const hoverX = event.clientX - rect.left;
+      const percent = hoverX / rect.width;
+      const sec = Math.floor(totalTimeSec * percent);
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      const tip = document.getElementById('waveHoverTooltip');
+      tip.style.display = 'block';
+      tip.style.left = hoverX + 'px';
+      tip.textContent = `${m}:${s}`;
+    }
+
+    function hideWaveformHover() {
+      document.getElementById('waveHoverTooltip').style.display = 'none';
+    }
+
+    // 直播歌词开关 (位于音量调节下方右侧)
+    function toggleLiveLyrics() {
+      liveLyricsVisible = !liveLyricsVisible;
+      const overlay = document.getElementById('floatingLyricsOverlay');
+      const subcard = document.getElementById('liveLyricsSubcard') || document.getElementById('liveLyricsCompound');
+      if (liveLyricsVisible) {
+        if (overlay) overlay.classList.add('show');
+        if (subcard) subcard.classList.add('active');
+        showToast('直播歌词已开启 (桌面置顶透视)', '☼');
+      } else {
+        if (overlay) overlay.classList.remove('show');
+        if (subcard) subcard.classList.remove('active');
+        showToast('直播歌词已关闭', '🌑');
+      }
+    }
+
+    // 播放 / 暂停切换
+    function togglePlayPause() {
+      isPlaying = !isPlaying;
+      const icon = document.getElementById('playBtnIcon');
+      if (icon) {
+        icon.textContent = isPlaying ? '⏸' : '▶';
+      }
+      showToast(isPlaying ? '继续播放当前曲目' : '已暂停播放', isPlaying ? '▶' : '⏸');
+    }
+
+    // 4连单选滑块 (AI跟唱, AI唱歌, 自唱, 聊天)
+    function setQuadMode(modeKey, index) {
+      currentModeIndex = index;
+      const pill = document.getElementById('quadSliderPill');
+      if (pill) {
+        pill.style.left = `calc(${index * 25}% + 2px)`;
+      }
+      document.querySelectorAll('.quad-segment-opt').forEach((opt, idx) => {
+        opt.classList.toggle('active', idx === index);
+      });
+      const names = {
+        'follow': 'AI跟唱模式 (微弱伴奏人声AI实时跟唱)',
+        'aising': 'AI唱歌模式 (AI完整领唱与主旋律覆盖)',
+        'self': '自唱模式 (原声无干预伴奏试听)',
+        'chat': '聊天模式 (极低伴奏背景音与清晰人声)'
+      };
+      showToast('已切换为：' + (names[modeKey] || modeKey), '🎙️');
+    }
+
+    // 左侧歌曲列表选择
+    function selectSong(el, title, duration) {
+      document.querySelectorAll('.song-list-container .song-item-row').forEach(row => row.classList.remove('active'));
+      if (el) el.classList.add('active');
+      activeSongName = title;
+      const stageSong = document.getElementById('stageCurrentSong');
+      const dockTitle = document.getElementById('dockSongTitle');
+      const dockTime = document.getElementById('dockTimeLabel');
+      const heroLyric = document.getElementById('heroLyricLine');
+      const floatingLyric = document.getElementById('floatingLyricText');
+      const altBtn = document.getElementById('dockAltTrackBtn');
+      const altTxt = document.getElementById('dockAltTrackText');
+
+      if (stageSong) stageSong.textContent = title;
+      if (dockTitle) {
+        dockTitle.textContent = title;
+        dockTitle.setAttribute('title', title);
+      }
+      if (dockTime) dockTime.textContent = `00:00 / ${duration}`;
+
+      if (title === '爱的代价' && isAltLyricsActive) {
+        if (heroLyric) heroLyric.innerHTML = `<span class="alt-hero-tag">改</span>${currentAltLyricData.altText} <button class="alt-lyric-edit-inline-btn" onclick="event.stopPropagation(); openAltLyricsStudio('${title}')" title="编辑该句改词">✏️</button>`;
+        if (floatingLyric) floatingLyric.innerHTML = `<span style="color:var(--glow-primary); font-weight:700;">[改]</span> ${currentAltLyricData.altText}`;
+      } else {
+        if (heroLyric) heroLyric.textContent = `当前播放：《${title}》`;
+        if (floatingLyric) floatingLyric.textContent = `当前播放：《${title}》`;
+      }
+
+      waveProgress = 0;
+      isPlaying = true;
+      const playIcon = document.getElementById('playBtnIcon');
+      if (playIcon) playIcon.textContent = '⏸';
+      showToast(`已加载歌曲：《${title}》`, '🎵');
+    }
+
+    // 歌曲分组筛选
+    function filterCategory(cat, el) {
+      document.querySelectorAll('.category-tabs-bar .cat-pill').forEach(btn => btn.classList.remove('active'));
+      if (el) el.classList.add('active');
+      const rows = document.querySelectorAll('.song-list-container .song-item-row');
+      rows.forEach(row => {
+        if (cat === 'all') {
+          row.style.display = 'flex';
+        } else if (cat === 'fav') {
+          const title = row.getAttribute('data-title');
+          row.style.display = (title === '爱的代价' || title === '当爱已成往事') ? 'flex' : 'none';
+        }
+      });
+      showToast(cat === 'fav' ? '已筛选「收藏」分类歌曲' : '已展示全部歌曲列表', '📁');
+    }
+
+    // 歌曲搜索过滤
+    function handleSongSearch(val) {
+      const query = (val || '').trim().toLowerCase();
+      const rows = document.querySelectorAll('.song-list-container .song-item-row');
+      rows.forEach(row => {
+        const title = (row.getAttribute('data-title') || '').toLowerCase();
+        row.style.display = title.includes(query) ? 'flex' : 'none';
+      });
+    }
+
+    // 查看登录界面切换
+    function toggleLoginView() {
+      const portal = document.getElementById('viewLoginPortal');
+      const btn = document.getElementById('btnToggleLoginView');
+      if (portal) {
+        const isAct = portal.classList.toggle('active');
+        if (btn) btn.innerHTML = isAct ? '✕ 返回主工作台' : '🔐 查看登录界面';
+      }
+    }
+
+    // 登录成功模拟
+    function doSimulatedLogin() {
+      const portal = document.getElementById('viewLoginPortal');
+      const btn = document.getElementById('btnToggleLoginView');
+      if (portal) portal.classList.remove('active');
+      if (btn) btn.innerHTML = '🔐 查看登录界面';
+      showToast('登录成功！已载入青玄云端音效授权与模型缓存', '🎉');
+    }
+
+    function openLiveLyricsSettings() {
+      document.getElementById('modalLiveLyricsSettings').classList.add('show');
+    }
+
+    function openRackPluginModal() {
+      document.getElementById('modalRackPlugin').classList.add('show');
+    }
+
+    function openSettingsModal() {
+      document.getElementById('modalSettings').classList.add('show');
+    }
+
+    function openSupportModal() {
+      document.getElementById('modalSupport').classList.add('show');
+    }
+
+    function openUploadSongModal() {
+      document.getElementById('modalUploadSong').classList.add('show');
+    }
+
+    function openAddCategoryModal() {
+      document.getElementById('modalAddCategory').classList.add('show');
+    }
+
+    function submitNewCategory() {
+      const name = document.getElementById('newCategoryName').value.trim();
+      if (!name) {
+        alert('请输入有效的分组名称！');
+        return;
+      }
+      closeModal('modalAddCategory');
+      showToast('成功创建并添加新分组「' + name + '」', '🏷️');
+    }
+
+    function openSongMenu(el, title) {
+      document.getElementById('lblSongMenuTitle').textContent = '操作「' + title + '」';
+      document.getElementById('modalSongMenu').classList.add('show');
+    }
+
+    function deleteCurrentSelectedSong() {
+      const activeRow = document.querySelector('.song-item-row.active');
+      if (activeRow) {
+        activeRow.style.transition = 'all 0.3s ease';
+        activeRow.style.opacity = '0';
+        activeRow.style.transform = 'translateX(-30px)';
+        setTimeout(() => {
+          activeRow.remove();
+          showToast('已从列表中移除该歌曲', '🗑️');
+        }, 300);
+      }
+    }
+
+    function seekToLyric(lineIndex) {
+      showToast('定位到第 ' + lineIndex + ' 句歌词', '🎤');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    let toastTimer = null;
+    function showToast(msg, icon = '✨') {
+      const banner = document.getElementById('toastBanner');
+      document.getElementById('toastIcon').textContent = icon;
+      document.getElementById('toastMsg').textContent = msg;
+      banner.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        banner.classList.remove('show');
+      }, 2400);
+    }
+
+    // 全局点击遮罩外部关闭下拉菜单
+    window.addEventListener('click', (e) => {
+      if (!e.target.closest('#headerDropdownWrap')) {
+        closeHeaderDropdown();
+      }
+      if (!e.target.closest('#themeDropdownContainer')) {
+        closeThemeDropdown();
+      }
+    });
+
+    // 键盘快捷键监听 (空格播放/暂停, F1-F4模式)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlayPause();
+      } else if (e.code === 'F1') {
+        e.preventDefault();
+        setQuadMode('follow', 0);
+      } else if (e.code === 'F2') {
+        e.preventDefault();
+        setQuadMode('aising', 1);
+      } else if (e.code === 'F3') {
+        e.preventDefault();
+        setQuadMode('self', 2);
+      } else if (e.code === 'F4') {
+        e.preventDefault();
+        setQuadMode('chat', 3);
+      }
+    });
+
+    // 音乐搜索占位交互
+    function doCloudMusicSearch() {
+      const input = document.getElementById('cloudMusicSearchInput');
+      const val = input ? input.value.trim() : '';
+      if (!val) {
+        showToast('请输入歌名或歌手后再搜索', '🔍');
+        return;
+      }
+      showToast(`正在全网云库检索「${val}」伴奏与歌词...`, '⏳');
+      setTimeout(() => {
+        showToast(`已搜到「${val}」高品质无损伴奏，可一键导入`, '🎵');
+      }, 900);
+    }
+
+    function quickFillSearch(tag) {
+      const input = document.getElementById('cloudMusicSearchInput');
+      if (input) {
+        input.value = tag;
+        doCloudMusicSearch();
+      }
+    }
+
+    // 音乐创作模块交互
+    let activeCreateTab = 'lyrics';
+    function switchCreateSubTab(el, type) {
+      document.querySelectorAll('.create-tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (el) el.classList.add('active');
+      activeCreateTab = type;
+      const input = document.getElementById('createPromptInput');
+      const hints = {
+        'lyrics': '输入主题或韵脚灵感，如：关于青春错过的古风诗意歌词...',
+        'compose': '输入伴奏编曲风格，如：BPM 95 伤感流行钢琴与弦乐铺底...',
+        'altlyrics': '输入改词灵感或套用模版，如：把“这是爱的代价”改成感谢榜一大哥...',
+        'timbre': '输入声线微调提示，如：磁性烟嗓、空灵女声、撕裂高音...'
+      };
+      if (input) input.placeholder = hints[type] || '输入灵感创意...';
+      const names = { 'lyrics': '灵感作词', 'compose': '伴奏编曲', 'altlyrics': '智能改词', 'timbre': '声线重塑' };
+      showToast(`已切换至「${names[type]}」创作模式`, '🎹');
+
+      if (type === 'altlyrics') {
+        const chipsWrap = document.querySelector('.create-style-chips');
+        if (chipsWrap) {
+          chipsWrap.innerHTML = `
+            <span class="chip-item" onclick="insertPromptKeyword('感谢榜一跑车')">🎁 感谢榜一</span>
+            <span class="chip-item" onclick="insertPromptKeyword('祝大哥生日快乐')">🎂 生日快乐</span>
+            <span class="chip-item" onclick="insertPromptKeyword('原唱声线克隆')">🎙️ 原唱克隆</span>
+            <span class="chip-item" onclick="openAltLyricsStudio(activeSongName)">✍️ 进入工坊</span>
+          `;
+        }
+        const actionBtn = document.querySelector('.create-action-btn');
+        if (actionBtn) {
+          actionBtn.innerHTML = `<span>✍️</span><span>打开 AI 智能改词工坊</span>`;
+        }
+      } else {
+        const actionBtn = document.querySelector('.create-action-btn');
+        if (actionBtn) {
+          actionBtn.innerHTML = `<span>✨</span><span>立即生成 AI 创作方案</span>`;
+        }
+      }
+    }
+
+    function insertPromptKeyword(kw) {
+      const input = document.getElementById('createPromptInput');
+      if (input) {
+        input.value = input.value ? (input.value + '，' + kw) : kw;
+        input.focus();
+      }
+    }
+
+    function doTriggerMusicCreate() {
+      if (activeCreateTab === 'altlyrics') {
+        openAltLyricsStudio(activeSongName);
+        return;
+      }
+      const input = document.getElementById('createPromptInput');
+      const val = input ? input.value.trim() : '';
+      const promptText = val || '国风抒情风格伴奏与歌词';
+      showToast(`青玄 AI 创作引擎正在生成：「${promptText}」`, '✨');
+      setTimeout(() => {
+        showToast('生成成功！伴奏多轨分轨与歌词草稿已就绪', '🎉');
+      }, 1200);
+    }
+
+    // ========================================================
+    // 青玄 AI 智能改词系统状态与控制 (Alt-Lyrics System)
+    // ========================================================
+    let isAltLyricsActive = false;
+    let currentAltLyricData = {
+      song: '爱的代价',
+      lineIndex: 4,
+      timeStr: '02:35 - 02:42',
+      origText: '这是爱的代价',
+      altText: '这是给榜一的谢礼',
+      origSyllables: 6,
+      hasSynthesized: true
+    };
+
+    function toggleAltLyricsTrack(forceState) {
+      if (typeof forceState === 'boolean') {
+        isAltLyricsActive = forceState;
+      } else {
+        isAltLyricsActive = !isAltLyricsActive;
+      }
+
+      const btn = document.getElementById('dockAltTrackBtn');
+      const txt = document.getElementById('dockAltTrackText');
+      const badge = document.getElementById('badgeSongAltTrack');
+      const heroLyric = document.getElementById('heroLyricLine');
+      const floatingLyric = document.getElementById('floatingLyricText');
+
+      if (btn) {
+        btn.classList.toggle('active', isAltLyricsActive);
+      }
+      if (txt) {
+        txt.textContent = isAltLyricsActive ? '✍️ 改词轨 (生效中)' : '原曲轨';
+      }
+      if (badge) {
+        badge.classList.toggle('active', isAltLyricsActive);
+      }
+
+      if (heroLyric) {
+        if (isAltLyricsActive) {
+          heroLyric.innerHTML = `<span class="alt-hero-tag">改</span>${currentAltLyricData.altText} <button class="alt-lyric-edit-inline-btn" onclick="event.stopPropagation(); openAltLyricsStudio('${activeSongName}')" title="编辑该句改词">✏️</button>`;
+        } else {
+          heroLyric.textContent = currentAltLyricData.origText;
+        }
+      }
+
+      if (floatingLyric) {
+        if (isAltLyricsActive) {
+          floatingLyric.innerHTML = `<span style="color:var(--glow-primary); font-weight:700;">[改]</span> ${currentAltLyricData.altText}`;
+        } else {
+          floatingLyric.textContent = currentAltLyricData.origText;
+        }
+      }
+
+      if (isAltLyricsActive) {
+        showToast('已开启「AI 智能改词分轨」，原曲旋律已无感对齐！', '✍️');
+      } else {
+        showToast('已切回「原曲人声轨」', '🎵');
+      }
+    }
+
+    function openAltLyricsStudio(songTitle) {
+      const songName = songTitle || activeSongName || '爱的代价';
+      const label = document.getElementById('altStudioSongName');
+      if (label) label.textContent = songName;
+      document.getElementById('modalAltLyricsStudio').classList.add('show');
+      updateMeterMatch();
+    }
+
+    function openAltLyricsStudioFromMenu() {
+      closeModal('modalSongMenu');
+      openAltLyricsStudio(activeSongName);
+    }
+
+    function selectAltTargetLine(el, idx, timeStr, origText) {
+      document.querySelectorAll('.alt-line-chip').forEach(c => c.classList.remove('selected'));
+      if (el) el.classList.add('selected');
+      currentAltLyricData.lineIndex = idx;
+      currentAltLyricData.timeStr = timeStr;
+      currentAltLyricData.origText = origText;
+
+      const origBox = document.getElementById('altOrigSentenceBox');
+      const meterBadge = document.getElementById('altOrigMeterBadge');
+      const sliceTime = document.getElementById('altSliceTimestamp');
+      const lblOrig = document.getElementById('lblOrigSyllables');
+
+      const sylCount = origText.replace(/[\s\p{P}]/gu, '').length;
+      currentAltLyricData.origSyllables = sylCount;
+
+      if (origBox) origBox.textContent = origText;
+      if (meterBadge) meterBadge.textContent = `原曲: ${sylCount} 音节`;
+      if (lblOrig) lblOrig.textContent = `${sylCount} 字 / ${sylCount} 音节`;
+      if (sliceTime) sliceTime.textContent = `${timeStr} [${sylCount} 音节]`;
+
+      updateMeterMatch();
+    }
+
+    function updateMeterMatch(val) {
+      const input = document.getElementById('altReplacementInput');
+      const text = (val !== undefined ? val : (input ? input.value : '')).trim();
+      const origSyl = currentAltLyricData.origSyllables || 6;
+      const cleanLen = text.replace(/[\s\p{P}]/gu, '').length;
+
+      const indicator = document.getElementById('altMeterIndicator');
+      const meterText = document.getElementById('altMeterText');
+      const lblAlt = document.getElementById('lblAltSyllables');
+      const coreText = document.getElementById('altSliceCoreText');
+
+      if (lblAlt) lblAlt.textContent = `${cleanLen} 字 / ${cleanLen} 音节`;
+      if (coreText) coreText.textContent = `✨ AI 改词: ${text || '...'}`;
+
+      if (indicator && meterText) {
+        if (cleanLen === origSyl) {
+          indicator.className = 'alt-meter-indicator';
+          meterText.textContent = `音节匹配度 100% · ${cleanLen} 字完美契合原曲 ${origSyl} 音节旋律与节拍！🎯`;
+        } else if (cleanLen > 0 && Math.abs(cleanLen - origSyl) <= 2) {
+          indicator.className = 'alt-meter-indicator';
+          meterText.textContent = `音节匹配度 92% · ${cleanLen} 字与原曲 ${origSyl} 音节基本吻合，青玄声学引擎将微调音素延展 ⚡`;
+        } else if (cleanLen > 0) {
+          indicator.className = 'alt-meter-indicator warn';
+          meterText.textContent = `提示：新词 ${cleanLen} 字与原曲 ${origSyl} 音节相差较大，可能会出现部分吐字拉长或压缩 ⚠️`;
+        } else {
+          indicator.className = 'alt-meter-indicator warn';
+          meterText.textContent = '请输入有效替换歌词...';
+        }
+      }
+    }
+
+    function applyAltPreset(presetText) {
+      const input = document.getElementById('altReplacementInput');
+      if (input) {
+        input.value = presetText;
+        updateMeterMatch(presetText);
+      }
+    }
+
+    let isAuditioning = false;
+    function auditionAltLyric() {
+      if (isAuditioning) return;
+      isAuditioning = true;
+      const btnTxt = document.getElementById('btnAuditionText');
+      const corePart = document.getElementById('altSliceCoreText');
+      if (btnTxt) btnTxt.textContent = '正在试听中...';
+      if (corePart) {
+        corePart.style.boxShadow = '0 0 24px var(--glow-primary)';
+        corePart.style.borderColor = 'var(--glow-success)';
+      }
+      showToast('正在试听 AI 改词融接切片 (120ms S-Curve 交叉淡化)...', '🎧');
+
+      setTimeout(() => {
+        isAuditioning = false;
+        if (btnTxt) btnTxt.textContent = '试听切片效果';
+        if (corePart) {
+          corePart.style.boxShadow = '';
+          corePart.style.borderColor = '';
+        }
+      }, 2200);
+    }
+
+    function generateAndSaveAltLyrics() {
+      const input = document.getElementById('altReplacementInput');
+      const newText = input ? input.value.trim() : '这是给榜一的谢礼';
+      if (!newText) {
+        showToast('请输入有效的替换歌词内容', '⚠️');
+        return;
+      }
+
+      currentAltLyricData.altText = newText;
+      const wrap = document.getElementById('altProgressWrap');
+      const bar = document.getElementById('altProgressBar');
+      const lbl = document.getElementById('altProgressLabel');
+
+      if (wrap) wrap.style.display = 'flex';
+      if (bar) bar.style.width = '0%';
+      if (lbl) lbl.textContent = '正在分析原曲 F0 旋律音高曲线并提取伴奏干声...';
+
+      setTimeout(() => {
+        if (bar) bar.style.width = '45%';
+        if (lbl) lbl.textContent = '正在调用青玄大模型声线克隆合成替换歌词音素...';
+      }, 350);
+
+      setTimeout(() => {
+        if (bar) bar.style.width = '85%';
+        if (lbl) lbl.textContent = '正在计算 RMS 能量平衡 (-14.0 LUFS) 与 120ms S-Curve 交叉淡化...';
+      }, 700);
+
+      setTimeout(() => {
+        if (bar) bar.style.width = '100%';
+        if (lbl) lbl.textContent = '改词分轨合成完毕！已生成 alt_vocal.wav 并无感入轨！';
+
+        setTimeout(() => {
+          if (wrap) wrap.style.display = 'none';
+          closeModal('modalAltLyricsStudio');
+          toggleAltLyricsTrack(true);
+          showToast('🎉 改词成功！已为您自动载入并切换到 AI 改词分轨播放！', '✨');
+        }, 300);
+      }, 1050);
+    }
+
+    // 菜单快速导航定位至音乐搜索与创作
+    function navToMusicSearch() {
+      switchMainTab('playback');
+      const card = document.getElementById('musicSearchCard');
+      const input = document.getElementById('cloudMusicSearchInput');
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        card.classList.add('nav-focus-highlight');
+        setTimeout(() => card.classList.remove('nav-focus-highlight'), 1600);
+      }
+      if (input) {
+        input.focus();
+      }
+      showToast('已定位至「音乐搜索」全网伴奏库', '🔍');
+    }
+
+    function navToMusicCreate() {
+      switchMainTab('playback');
+      const card = document.getElementById('musicCreateCard');
+      const input = document.getElementById('createPromptInput');
+      if (card) {
+        card.classList.add('nav-focus-highlight');
+        setTimeout(() => card.classList.remove('nav-focus-highlight'), 1600);
+      }
+      if (input) {
+        input.focus();
+      }
+      showToast('已定位至「音乐创作」AI Studio', '🎹');
+    }
+  </script>
+</body>
+</html>

@@ -1,8 +1,0 @@
---index-url https://pypi.tuna.tsinghua.edu.cn/simple
---trusted-host mirrors.aliyun.com
---trusted-host pypi.tuna.tsinghua.edu.cn
-
-# CUDA-enabled runtime required for RVC training and inference.
-https://mirrors.aliyun.com/pytorch-wheels/cu124/torch-2.6.0%2Bcu124-cp311-cp311-linux_x86_64.whl
-https://mirrors.aliyun.com/pytorch-wheels/cu124/torchaudio-2.6.0%2Bcu124-cp311-cp311-linux_x86_64.whl
-https://mirrors.aliyun.com/pytorch-wheels/cu124/torchvision-0.21.0%2Bcu124-cp311-cp311-linux_x86_64.whl
