@@ -1237,9 +1237,9 @@
       -webkit-backdrop-filter: blur(20px);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
       transition: all 0.25s ease;
-      height: 180px; /* 固定高度，不随窗口增高，底部固定 */
-      min-height: 180px;
-      max-height: 180px;
+      height: 205px; /* 固定高度，不随窗口增高，底部固定 */
+      min-height: 205px;
+      max-height: 205px;
       flex-shrink: 0;
       box-sizing: border-box;
       justify-content: space-between;
@@ -1392,8 +1392,8 @@
     .create-tab-btn {
       flex: 1;
       height: 25px;
-      font-size: 10.5px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       border: none;
       border-radius: 5px;
       background: transparent;
@@ -1403,7 +1403,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 3px;
+      white-space: nowrap;
+      padding: 0 4px;
+      letter-spacing: -0.2px;
     }
     .create-tab-btn:hover {
       color: var(--text-main);
@@ -2602,6 +2604,423 @@
       transform: translateY(-1px);
       box-shadow: 0 6px 20px rgba(0, 242, 254, 0.5);
     }
+
+    /* ========================================================
+       洛雪全网音乐搜索与一键训练中心 (LX MUSIC SEARCH & TRAIN)
+       ======================================================== */
+    .lx-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      background: rgba(0, 242, 254, 0.15);
+      border: 1px solid rgba(0, 242, 254, 0.35);
+      color: var(--glow-primary);
+      margin-left: 4px;
+    }
+    .card-badge-clickable {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .card-badge-clickable:hover {
+      background: rgba(0, 242, 254, 0.15);
+      border-color: var(--glow-primary);
+      color: #fff;
+    }
+
+    .search-platform-tabs {
+      display: flex;
+      gap: 3px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .platform-tab-chip {
+      flex: 1;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.18s ease;
+      white-space: nowrap;
+    }
+    .platform-tab-chip:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .platform-tab-chip.active {
+      color: #000;
+      background: var(--accent-gradient);
+      font-weight: 700;
+      box-shadow: 0 1px 6px rgba(0, 242, 254, 0.25);
+    }
+
+    /* 洛雪全网搜索与一键训练弹窗 */
+    .lx-studio-dialog {
+      width: 900px;
+      max-width: 95vw;
+      max-height: 90vh;
+      background: #0d1120;
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 242, 254, 0.18);
+      overflow: hidden;
+      backdrop-filter: blur(28px);
+    }
+
+    .lx-studio-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 12px;
+    }
+    .lx-studio-title-box {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .lx-studio-main-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lx-source-status-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(0, 245, 160, 0.12);
+      border: 1px solid rgba(0, 245, 160, 0.35);
+      color: var(--glow-success);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .lx-source-status-pill:hover {
+      background: rgba(0, 245, 160, 0.22);
+      box-shadow: 0 0 10px rgba(0, 245, 160, 0.3);
+    }
+
+    .lx-search-toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(15, 20, 36, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .lx-search-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .lx-main-search-input {
+      flex: 1;
+      height: 38px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-glow);
+      border-radius: 7px;
+      padding: 0 14px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #fff;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    .lx-main-search-input:focus {
+      border-color: var(--glow-primary);
+      box-shadow: 0 0 14px rgba(0, 242, 254, 0.3);
+    }
+    .lx-search-action-btn {
+      padding: 0 20px;
+      height: 38px;
+      background: var(--accent-gradient);
+      border: none;
+      border-radius: 7px;
+      color: #000;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 3px 12px rgba(0, 242, 254, 0.3);
+      transition: all 0.2s ease;
+    }
+    .lx-search-action-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 16px rgba(0, 242, 254, 0.45);
+    }
+
+    .lx-filter-bar-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .lx-platform-filter {
+      display: flex;
+      gap: 4px;
+    }
+    .lx-platform-chip {
+      height: 25px;
+      padding: 0 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+    }
+    .lx-platform-chip:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .lx-platform-chip.active {
+      color: #000;
+      background: var(--accent-gradient);
+      font-weight: 700;
+      border-color: transparent;
+      box-shadow: 0 2px 8px rgba(0, 242, 254, 0.25);
+    }
+
+    .lx-quality-filter-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .lx-quality-select {
+      height: 25px;
+      background: rgba(12, 16, 28, 0.9);
+      border: 1px solid var(--border-subtle);
+      border-radius: 5px;
+      color: #fff;
+      font-size: 11px;
+      padding: 0 6px;
+      outline: none;
+    }
+
+    /* 搜索结果列表 */
+    .lx-results-scroll {
+      flex: 1;
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      background: rgba(10, 14, 26, 0.75);
+      display: flex;
+      flex-direction: column;
+    }
+    .lx-song-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      transition: all 0.2s ease;
+    }
+    .lx-song-row:hover {
+      background: rgba(255, 255, 255, 0.035);
+    }
+    .lx-song-meta-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+    .lx-cover-thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .lx-song-text-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .lx-song-title-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lx-song-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .lx-song-artist {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .lx-tag-pill {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .tag-flac {
+      background: rgba(0, 245, 160, 0.15);
+      border: 1px solid rgba(0, 245, 160, 0.35);
+      color: var(--glow-success);
+    }
+    .tag-320k {
+      background: rgba(0, 242, 254, 0.15);
+      border: 1px solid rgba(0, 242, 254, 0.35);
+      color: var(--glow-primary);
+    }
+    .tag-source {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-muted);
+    }
+
+    .lx-song-actions-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .btn-lx-action {
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn-lx-play {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+    .btn-lx-play:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .btn-lx-dl {
+      background: rgba(0, 242, 254, 0.1);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      color: var(--glow-primary);
+    }
+    .btn-lx-dl:hover {
+      background: rgba(0, 242, 254, 0.2);
+    }
+    .btn-lx-train {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(127, 0, 255, 0.3) 100%);
+      border: 1px solid var(--glow-primary);
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
+    }
+    .btn-lx-train:hover {
+      background: var(--accent-gradient);
+      color: #000;
+      border-color: transparent;
+      box-shadow: 0 0 16px rgba(0, 242, 254, 0.45);
+      transform: translateY(-1px);
+    }
+
+    /* 自定义音源弹窗 */
+    .lx-source-dialog {
+      width: 580px;
+      max-width: 95vw;
+      background: #0d1120;
+      border: 1px solid var(--border-glow);
+      border-radius: 14px;
+      padding: 20px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 242, 254, 0.2);
+    }
+    .lx-source-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .lx-source-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .lx-source-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .lx-source-card.active {
+      background: rgba(0, 242, 254, 0.1);
+      border-color: var(--glow-primary);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+    }
+    .lx-source-name {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .lx-source-desc {
+      font-size: 10.5px;
+      color: var(--text-dim);
+    }
+    .lx-source-ping {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--glow-success);
+    }
   </style>
 </head>
 <body>
@@ -2640,14 +3059,6 @@
           <button class="nav-tab-btn active" id="tabBtnPlayback" onclick="switchMainTab('playback')">
             <span>🎵</span>
             <span>播放</span>
-          </button>
-          <button class="nav-tab-btn" id="tabBtnMusicSearch" onclick="navToMusicSearch()" title="定位并展开音乐搜索曲库">
-            <span>🔍</span>
-            <span>音乐搜索</span>
-          </button>
-          <button class="nav-tab-btn" id="tabBtnMusicCreate" onclick="navToMusicCreate()" title="定位并展开音乐创作工坊">
-            <span>🎹</span>
-            <span>音乐创作</span>
           </button>
 
           <!-- 训练处理跟我的还有设置做成下拉菜单 -->
@@ -2821,27 +3232,39 @@
               </div>
             </div>
 
-            <!-- 音乐搜索模块占位 (如图二位置) -->
+            <!-- 音乐搜索模块 (集成洛雪音乐全网音源、自定义源与一键训练) -->
             <div class="music-search-placeholder-card" id="musicSearchCard">
               <div class="card-head-row">
                 <div class="card-title-group">
                   <span class="card-icon">🔍</span>
                   <span class="card-title">音乐搜索</span>
+                  <span class="lx-badge">洛雪源</span>
                 </div>
-                <span class="card-badge">全网伴奏库</span>
+                <span class="card-badge-clickable" onclick="openLxCustomSourceModal()" id="cardLxSourceState" title="点击管理自定义音源脚本">⚙️ 六音源 (正常)</span>
               </div>
+
+              <!-- 洛雪音源平台快速切换 -->
+              <div class="search-platform-tabs">
+                <span class="platform-tab-chip active" onclick="switchSearchPlatform('all', this)">聚合</span>
+                <span class="platform-tab-chip" onclick="switchSearchPlatform('tx', this)">企鹅</span>
+                <span class="platform-tab-chip" onclick="switchSearchPlatform('kg', this)">酷狗</span>
+                <span class="platform-tab-chip" onclick="switchSearchPlatform('wy', this)">网易</span>
+                <span class="platform-tab-chip" onclick="switchSearchPlatform('kw', this)">酷我</span>
+                <span class="platform-tab-chip" onclick="switchSearchPlatform('mg', this)">咪咕</span>
+              </div>
+
               <div class="music-search-box">
-                <input type="text" class="music-search-input" id="cloudMusicSearchInput" placeholder="输入歌名/歌手全网找歌..." onkeydown="if(event.key==='Enter') doCloudMusicSearch()">
+                <input type="text" class="music-search-input" id="cloudMusicSearchInput" placeholder="输入歌名/歌手全网检索..." onkeydown="if(event.key==='Enter') doCloudMusicSearch()">
                 <button class="music-search-btn" onclick="doCloudMusicSearch()">搜索</button>
               </div>
               <div class="search-quick-tags">
-                <span class="quick-tag" onclick="quickFillSearch('抖音热歌')">🔥 抖音热歌</span>
-                <span class="quick-tag" onclick="quickFillSearch('经典老歌')">经典老歌</span>
-                <span class="quick-tag" onclick="quickFillSearch('KTV必唱')">KTV必唱</span>
-                <span class="quick-tag" onclick="quickFillSearch('流行金曲')">流行金曲</span>
+                <span class="quick-tag" onclick="quickFillSearch('晴天')">🔥 晴天</span>
+                <span class="quick-tag" onclick="quickFillSearch('起风了')">起风了</span>
+                <span class="quick-tag" onclick="quickFillSearch('孤勇者')">孤勇者</span>
+                <span class="quick-tag" onclick="quickFillSearch('大鱼')">大鱼</span>
               </div>
-              <div class="search-hint-box">
-                <span>💡 支持网易云/QQ音乐无损解析，提取后自动加入列表</span>
+              <div class="search-hint-box" onclick="openLxMusicStudio()" style="cursor: pointer;" title="点击展开洛雪全网搜索与一键训练中心">
+                <span>⚡ 洛雪音源已就绪 · 支持无损下载与一键训练 ❯</span>
               </div>
             </div>
           </div>
@@ -2951,10 +3374,10 @@
                   </div>
 
                   <div class="create-tab-row">
-                    <button class="create-tab-btn active" onclick="switchCreateSubTab(this, 'lyrics')">✍️ 灵感作词</button>
-                    <button class="create-tab-btn" onclick="switchCreateSubTab(this, 'compose')">🎸 伴奏编曲</button>
-                    <button class="create-tab-btn" onclick="switchCreateSubTab(this, 'altlyrics')">🎤 智能改词</button>
-                    <button class="create-tab-btn" onclick="switchCreateSubTab(this, 'timbre')">✨ 声线重塑</button>
+                    <button class="create-tab-btn active" onclick="switchCreateSubTab(this, 'lyrics')">灵感作词</button>
+                    <button class="create-tab-btn" onclick="switchCreateSubTab(this, 'compose')">伴奏编曲</button>
+                    <button class="create-tab-btn" onclick="switchCreateSubTab(this, 'altlyrics')">智能改词</button>
+                    <button class="create-tab-btn" onclick="switchCreateSubTab(this, 'timbre')">声线重塑</button>
                   </div>
 
                   <div class="create-prompt-wrap">
@@ -3017,7 +3440,6 @@
                     <div class="track-meta-wrap">
                       <div class="track-title-time">
                         <span class="track-title" id="dockSongTitle" title="爱的代价">爱的代价</span>
-                        <span class="dock-mode-tag" id="dockModeTag" onclick="toggleRackModePill()" title="点击切换普通/机架模式">机架模式</span>
                         <div class="dock-alt-control-group">
                           <button class="dock-alt-toggle-btn" id="dockAltTrackBtn" onclick="toggleAltLyricsTrack()" title="点击切换：原曲轨 ⇄ AI 改词分轨">
                             <span class="alt-glow-dot"></span>
@@ -3487,6 +3909,144 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: 洛雪全网音乐搜索、下载与一键训练中心 (LX Music Studio)
+       ======================================================== -->
+  <div class="modal-backdrop" id="modalLxMusicStudio" onclick="if(event.target===this)closeModal('modalLxMusicStudio')">
+    <div class="lx-studio-dialog">
+      <!-- 头部 -->
+      <div class="lx-studio-header">
+        <div class="lx-studio-title-group">
+          <span class="lx-brand-icon">⚡</span>
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="lx-studio-title">洛雪全网音乐搜索 & 一键训练中心</span>
+              <span class="lx-badge" style="background:rgba(0,242,254,0.15); color:var(--glow-primary); border:1px solid rgba(0,242,254,0.3); font-size:10px; padding:2px 6px; border-radius:4px;">LX v2.0 内核</span>
+            </div>
+            <div style="font-size:11px; color:var(--text-dim); margin-top:2px;">集成六音音源 · 支持全平台无损解析 · 伴奏/干声一键切片与模型训练</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <button class="top-action-btn" style="height:30px; font-size:11px; padding:0 10px;" onclick="openLxCustomSourceModal()">⚙️ 自定义源设置</button>
+          <span class="modal-close-x" onclick="closeModal('modalLxMusicStudio')">✕</span>
+        </div>
+      </div>
+
+      <!-- 搜索栏与平台过滤 -->
+      <div class="lx-search-toolbar">
+        <div class="lx-search-box-large">
+          <input type="text" class="lx-search-input" id="lxStudioSearchInput" placeholder="输入歌曲名、歌手、歌单或专辑，全网检索..." onkeydown="if(event.key==='Enter') doLxStudioSearch()">
+          <button class="lx-search-submit-btn" onclick="doLxStudioSearch()">
+            <span>🔍 全网检索</span>
+          </button>
+        </div>
+        <div class="lx-platform-filter-row">
+          <span style="font-size:11px; color:var(--text-dim); margin-right:4px;">音源平台：</span>
+          <span class="platform-tab-chip active" id="chipLx_all" onclick="filterLxPlatform('all', this)">🌐 聚合搜索</span>
+          <span class="platform-tab-chip" id="chipLx_tx" onclick="filterLxPlatform('tx', this)">🐧 企鹅音乐</span>
+          <span class="platform-tab-chip" id="chipLx_kg" onclick="filterLxPlatform('kg', this)">🐶 酷狗音乐</span>
+          <span class="platform-tab-chip" id="chipLx_wy" onclick="filterLxPlatform('wy', this)">☁️ 网易云</span>
+          <span class="platform-tab-chip" id="chipLx_kw" onclick="filterLxPlatform('kw', this)">⭐ 酷我音乐</span>
+          <span class="platform-tab-chip" id="chipLx_mg" onclick="filterLxPlatform('mg', this)">🎵 咪咕音乐</span>
+          <span style="flex:1;"></span>
+          <span style="font-size:11px; color:var(--glow-success);" id="lxSourceStatusNotice">● 六音自定义源已激活 (28ms)</span>
+        </div>
+      </div>
+
+      <!-- 搜索结果列表容器 -->
+      <div class="lx-results-container" id="lxResultsContainer">
+        <!-- 动态生成展示歌曲列表 -->
+      </div>
+
+      <!-- 训练与下载状态条 (执行一键训练时展开) -->
+      <div class="alt-progress-wrap" id="lxTrainProgressWrap" style="display:none; margin:0; padding:10px 14px; background:rgba(0,0,0,0.4); border-radius:8px; border:1px solid rgba(0,242,254,0.2);">
+        <div class="alt-progress-bar-bg" style="height:6px;">
+          <div class="alt-progress-bar-fill" id="lxTrainProgressBar" style="width:0%;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+          <span class="alt-progress-label" id="lxTrainProgressLabel" style="font-size:11.5px; color:#fff;">正在拉取无损音轨...</span>
+          <span style="font-size:11px; font-family:'JetBrains Mono', monospace; color:var(--glow-primary);" id="lxTrainPercent">0%</span>
+        </div>
+      </div>
+
+      <!-- 底部统计与说明 -->
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-dim); border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+        <span>💡 提示：点击「一键训练处理」将自动拉取 FLAC 无损伴奏与 LRC 逐字歌词，执行 HTDemucs 48kHz 人声分离与 RMVPE 音高校准</span>
+        <button class="top-action-btn" style="height:28px; padding:0 12px; font-size:11px;" onclick="closeModal('modalLxMusicStudio')">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: 自定义源管理配置弹窗 (Custom Source Management)
+       ======================================================== -->
+  <div class="modal-backdrop" id="modalLxCustomSource" onclick="if(event.target===this)closeModal('modalLxCustomSource')">
+    <div class="lx-source-dialog">
+      <div class="modal-head">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span>⚙️ 洛雪自定义源脚本管理</span>
+          <span style="font-size:10px; background:rgba(0,242,254,0.1); color:var(--glow-primary); border:1px solid rgba(0,242,254,0.3); padding:1px 5px; border-radius:4px;">User Script API</span>
+        </div>
+        <span class="modal-close-x" onclick="closeModal('modalLxCustomSource')">✕</span>
+      </div>
+
+      <div style="font-size:11.5px; color:var(--text-muted); line-height:1.5;">
+        基于 LX Music Desktop 标准的自定义源规范，支持导入外部 .js 脚本或远程音源 API 服务，突破平台版权与无损解析限制。
+      </div>
+
+      <!-- 当前音源列表 -->
+      <div class="lx-source-list" id="lxSourceCardList">
+        <div class="lx-source-card active" id="srcCard_sixin" onclick="activateLxSource('sixin')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="radio" name="lxSourceRadio" checked style="accent-color:var(--glow-primary); cursor:pointer;">
+            <div>
+              <div class="lx-source-name">六音自定义源 (内置推荐) · v1.2.0</div>
+              <div class="lx-source-desc">全平台音源支持 · 包含企鹅/网易/酷狗/酷我/咪咕高品质与无损FLAC解析</div>
+            </div>
+          </div>
+          <span class="lx-source-ping" id="ping_sixin">28ms 极佳</span>
+        </div>
+
+        <div class="lx-source-card" id="srcCard_ikun" onclick="activateLxSource('ikun')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="radio" name="lxSourceRadio" style="accent-color:var(--glow-primary); cursor:pointer;">
+            <div>
+              <div class="lx-source-name">爱坤镜像备用音源 · v2.4.1</div>
+              <div class="lx-source-desc">高可用多节点备份源 · 专攻无损音乐抓取与逐字歌词提取</div>
+            </div>
+          </div>
+          <span class="lx-source-ping" id="ping_ikun">45ms 正常</span>
+        </div>
+
+        <div class="lx-source-card" id="srcCard_local" onclick="activateLxSource('local')">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="radio" name="lxSourceRadio" style="accent-color:var(--glow-primary); cursor:pointer;">
+            <div>
+              <div class="lx-source-name">本地开发者自定义脚本 (*.js / Node.js)</div>
+              <div class="lx-source-desc">自定义编写解析规则，直接运行本地 JavaScript 脚本</div>
+            </div>
+          </div>
+          <span class="lx-source-ping" id="ping_local">0ms 本地</span>
+        </div>
+      </div>
+
+      <!-- 导入新自定义源 -->
+      <div style="display:flex; flex-direction:column; gap:6px; margin-top:4px;">
+        <label style="font-size:11px; color:var(--text-dim);">导入在线自定义源脚本 URL 或 本地 .js 文件：</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" class="song-search-input" id="inputCustomSourceUrl" placeholder="https://raw.githubusercontent.com/.../lx-source.js" style="height:34px; font-size:12px; flex:1;">
+          <button class="top-action-btn" style="height:34px; padding:0 12px; font-size:11px;" onclick="importCustomSourceFromUrl()">导入并校验</button>
+          <button class="cat-pill" style="height:34px; padding:0 10px; font-size:11px;" onclick="testCustomSourceConnectivity()">⚡ 测速</button>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+        <button class="cat-pill" onclick="closeModal('modalLxCustomSource')">取消</button>
+        <button class="top-action-btn" style="height:34px; padding:0 16px; background:var(--accent-gradient); color:#000; font-weight:700;" onclick="saveAndApplyCustomSource()">确认并生效</button>
+      </div>
     </div>
   </div>
 
@@ -4129,7 +4689,8 @@
     }
 
     function closeModal(id) {
-      document.getElementById(id).classList.remove('show');
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('show');
     }
 
     let toastTimer = null;
@@ -4175,26 +4736,491 @@
       }
     });
 
-    // 音乐搜索占位交互
+    // ========================================================
+    // 洛雪音乐 (LX Music Desktop) 全网搜索、自定义源与一键训练引擎
+    // ========================================================
+    let currentSearchPlatform = 'all'; // 'all', 'tx', 'kg', 'wy', 'kw', 'mg'
+    let currentLxSource = 'sixin'; // 'sixin', 'ikun', 'local'
+    let lxCustomSources = {
+      'sixin': { name: '六音自定义源 (内置推荐) · v1.2.0', ping: 28, status: '正常', desc: '全平台企鹅/网易/酷狗/酷我/咪咕 FLAC 无损解析' },
+      'ikun': { name: '爱坤镜像备用音源 · v2.4.1', ping: 45, status: '正常', desc: '高可用多节点备份源 · 专攻无损音乐抓取与逐字歌词提取' },
+      'local': { name: '本地开发者自定义脚本 (*.js / Node.js)', ping: 0, status: '本地', desc: '自定义编写解析规则，直接运行本地 JavaScript 脚本' }
+    };
+
+    // 预置洛雪音乐多平台搜索模拟数据库 (包含歌曲、歌手、专辑、音质、平台、歌词与时长)
+    const lxMockSongs = [
+      {
+        id: 'lx_01',
+        title: '晴天',
+        artist: '周杰伦',
+        album: '叶惠美',
+        duration: '04:29',
+        platform: 'tx',
+        platformName: '企鹅音乐',
+        qualities: ['FLAC 无损', '320K', '128K'],
+        sampleRate: '48kHz / 24bit',
+        hasLyrics: true
+      },
+      {
+        id: 'lx_02',
+        title: '起风了',
+        artist: '买辣椒也用券',
+        album: '起风了 (Single)',
+        duration: '05:25',
+        platform: 'wy',
+        platformName: '网易云音乐',
+        qualities: ['Hi-Res 无损', 'FLAC', '320K'],
+        sampleRate: '96kHz / 24bit',
+        hasLyrics: true
+      },
+      {
+        id: 'lx_03',
+        title: '孤勇者',
+        artist: '陈奕迅',
+        album: '英雄联盟：双城之战',
+        duration: '04:16',
+        platform: 'kg',
+        platformName: '酷狗音乐',
+        qualities: ['FLAC 无损', '320K'],
+        sampleRate: '48kHz / 16bit',
+        hasLyrics: true
+      },
+      {
+        id: 'lx_04',
+        title: '大鱼',
+        artist: '周深',
+        album: '大鱼海棠 电影原声带',
+        duration: '05:13',
+        platform: 'kw',
+        platformName: '酷我音乐',
+        qualities: ['FLAC 无损', '320K'],
+        sampleRate: '48kHz / 24bit',
+        hasLyrics: true
+      },
+      {
+        id: 'lx_05',
+        title: '爱的代价',
+        artist: '李宗盛',
+        album: '李宗盛作品精选',
+        duration: '04:32',
+        platform: 'tx',
+        platformName: '企鹅音乐',
+        qualities: ['FLAC 无损', '320K'],
+        sampleRate: '48kHz / 16bit',
+        hasLyrics: true
+      },
+      {
+        id: 'lx_06',
+        title: '后来',
+        artist: '刘若英',
+        album: '我等你',
+        duration: '05:41',
+        platform: 'mg',
+        platformName: '咪咕音乐',
+        qualities: ['FLAC 无损', '320K'],
+        sampleRate: '48kHz / 16bit',
+        hasLyrics: true
+      },
+      {
+        id: 'lx_07',
+        title: '乌梅子酱',
+        artist: '李荣浩',
+        album: '纵横四海',
+        duration: '03:30',
+        platform: 'tx',
+        platformName: '企鹅音乐',
+        qualities: ['FLAC 无损', '320K'],
+        sampleRate: '48kHz / 24bit',
+        hasLyrics: true
+      },
+      {
+        id: 'lx_08',
+        title: '句号',
+        artist: 'G.E.M. 邓紫棋',
+        album: '摩天动物园',
+        duration: '03:55',
+        platform: 'wy',
+        platformName: '网易云音乐',
+        qualities: ['Hi-Res 无损', 'FLAC', '320K'],
+        sampleRate: '96kHz / 24bit',
+        hasLyrics: true
+      }
+    ];
+
+    let currentLxSearchResults = [...lxMockSongs];
+
+    // 平台切换 (首页小卡片)
+    function switchSearchPlatform(platformKey, el) {
+      document.querySelectorAll('#musicSearchCard .platform-tab-chip').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+      currentSearchPlatform = platformKey;
+      const platformNames = { 'all': '全网聚合', 'tx': '企鹅音乐', 'kg': '酷狗音乐', 'wy': '网易云音乐', 'kw': '酷我音乐', 'mg': '咪咕音乐' };
+      showToast(`已切换至「${platformNames[platformKey]}」音源平台`, '🔍');
+    }
+
+    // 首页小卡片回车搜索 -> 唤醒完整 LX 搜索工坊
     function doCloudMusicSearch() {
       const input = document.getElementById('cloudMusicSearchInput');
       const val = input ? input.value.trim() : '';
-      if (!val) {
-        showToast('请输入歌名或歌手后再搜索', '🔍');
-        return;
-      }
-      showToast(`正在全网云库检索「${val}」伴奏与歌词...`, '⏳');
-      setTimeout(() => {
-        showToast(`已搜到「${val}」高品质无损伴奏，可一键导入`, '🎵');
-      }, 900);
+      openLxMusicStudio(val);
     }
 
     function quickFillSearch(tag) {
       const input = document.getElementById('cloudMusicSearchInput');
+      if (input) input.value = tag;
+      openLxMusicStudio(tag);
+    }
+
+    // 打开洛雪音乐搜索中心
+    function openLxMusicStudio(keyword) {
+      const modal = document.getElementById('modalLxMusicStudio');
+      if (modal) modal.classList.add('show');
+      const input = document.getElementById('lxStudioSearchInput');
       if (input) {
-        input.value = tag;
-        doCloudMusicSearch();
+        if (keyword !== undefined && keyword !== null) {
+          input.value = keyword;
+        }
+        input.focus();
       }
+      syncLxStudioPlatformChips();
+      doLxStudioSearch(keyword);
+    }
+
+    function syncLxStudioPlatformChips() {
+      document.querySelectorAll('.lx-platform-filter-row .platform-tab-chip').forEach(c => c.classList.remove('active'));
+      const activeChip = document.getElementById('chipLx_' + currentSearchPlatform);
+      if (activeChip) activeChip.classList.add('active');
+    }
+
+    function filterLxPlatform(platformKey, el) {
+      document.querySelectorAll('.lx-platform-filter-row .platform-tab-chip').forEach(c => c.classList.remove('active'));
+      if (el) el.classList.add('active');
+      currentSearchPlatform = platformKey;
+      // 同时更新首页卡片
+      document.querySelectorAll('#musicSearchCard .platform-tab-chip').forEach(c => {
+        if (c.textContent.trim().includes(getPlatformShortName(platformKey))) {
+          c.classList.add('active');
+        } else {
+          c.classList.remove('active');
+        }
+      });
+      doLxStudioSearch();
+    }
+
+    function getPlatformShortName(key) {
+      const map = { 'all': '聚合', 'tx': '企鹅', 'kg': '酷狗', 'wy': '网易', 'kw': '酷我', 'mg': '咪咕' };
+      return map[key] || '聚合';
+    }
+
+    function doLxStudioSearch(kwOverride) {
+      const input = document.getElementById('lxStudioSearchInput');
+      const kw = (kwOverride !== undefined ? kwOverride : (input ? input.value : '')).trim().toLowerCase();
+
+      let results = lxMockSongs;
+      if (currentSearchPlatform !== 'all') {
+        results = results.filter(s => s.platform === currentSearchPlatform);
+      }
+      if (kw) {
+        results = results.filter(s => s.title.toLowerCase().includes(kw) || s.artist.toLowerCase().includes(kw) || s.album.toLowerCase().includes(kw));
+        if (results.length === 0) {
+          results = [
+            {
+              id: 'lx_custom_1',
+              title: kwOverride || (input ? input.value : '搜索曲目'),
+              artist: '全网原唱 / 网络热门',
+              album: '热门现场版与官方原版',
+              duration: '03:45',
+              platform: currentSearchPlatform === 'all' ? 'tx' : currentSearchPlatform,
+              platformName: getPlatformFullName(currentSearchPlatform),
+              qualities: ['FLAC 无损', '320K', '128K'],
+              sampleRate: '48kHz / 24bit',
+              hasLyrics: true
+            },
+            {
+              id: 'lx_custom_2',
+              title: (kwOverride || (input ? input.value : '搜索曲目')) + ' (伴奏/消音版)',
+              artist: '官方伴奏母带',
+              album: '纯伴奏无损收录',
+              duration: '03:45',
+              platform: currentSearchPlatform === 'all' ? 'wy' : currentSearchPlatform,
+              platformName: getPlatformFullName(currentSearchPlatform),
+              qualities: ['FLAC 无损', '320K'],
+              sampleRate: '48kHz / 24bit',
+              hasLyrics: true
+            }
+          ];
+        }
+      }
+
+      currentLxSearchResults = results;
+      renderLxSearchResults(results);
+    }
+
+    function getPlatformFullName(key) {
+      const map = { 'all': '全网聚合', 'tx': '企鹅音乐', 'kg': '酷狗音乐', 'wy': '网易云音乐', 'kw': '酷我音乐', 'mg': '咪咕音乐' };
+      return map[key] || '全网音源';
+    }
+
+    function renderLxSearchResults(list) {
+      const container = document.getElementById('lxResultsContainer');
+      if (!container) return;
+
+      if (!list || list.length === 0) {
+        container.innerHTML = `
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:240px; color:var(--text-dim); gap:10px;">
+            <span style="font-size:36px;">🔍</span>
+            <span style="font-size:13px;">未检索到相关曲目，可尝试切换其他音源平台或检查自定义源配置</span>
+          </div>
+        `;
+        return;
+      }
+
+      const platformBadgeColors = {
+        'tx': 'background:rgba(18,185,129,0.15); color:#10b981; border:1px solid rgba(18,185,129,0.3);',
+        'wy': 'background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3);',
+        'kg': 'background:rgba(59,130,246,0.15); color:#3b82f6; border:1px solid rgba(59,130,246,0.3);',
+        'kw': 'background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3);',
+        'mg': 'background:rgba(236,72,153,0.15); color:#ec4899; border:1px solid rgba(236,72,153,0.3);'
+      };
+
+      container.innerHTML = list.map((song, idx) => {
+        const pColor = platformBadgeColors[song.platform] || 'background:rgba(0,242,254,0.15); color:var(--glow-primary); border:1px solid rgba(0,242,254,0.3);';
+        return `
+          <div class="lx-song-row" id="lxSongRow_${idx}">
+            <div class="lx-song-left">
+              <div class="lx-song-cover">
+                <span>🎵</span>
+              </div>
+              <div class="lx-song-info">
+                <div class="lx-song-title-line">
+                  <span class="lx-song-title">${song.title}</span>
+                  <span class="lx-platform-tag" style="${pColor}">${song.platformName}</span>
+                  <span class="lx-quality-tag">FLAC 无损</span>
+                </div>
+                <div class="lx-song-meta-line">
+                  <span>歌手：<strong>${song.artist}</strong></span>
+                  <span>·</span>
+                  <span>专辑：《${song.album}》</span>
+                  <span>·</span>
+                  <span>${song.sampleRate}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="lx-song-right">
+              <span class="lx-duration-col">${song.duration}</span>
+              <button class="btn-lx-action" onclick="previewLxSong('${song.title}', '${song.artist}')" title="试听原曲片段">
+                <span>🎧 试听</span>
+              </button>
+              <button class="btn-lx-action btn-lx-dl" onclick="downloadLxSong(${idx})" title="无损下载伴奏、原音频与逐字 LRC">
+                <span>⬇️ 下载</span>
+              </button>
+              <button class="btn-lx-action btn-lx-train" onclick="trainLxSong(${idx})" title="一键调用 HTDemucs 48kHz 分离与 RMVPE 音高校准，加入训练队列">
+                <span>⚡ 一键训练处理</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function previewLxSong(title, artist) {
+      showToast(`正在通过洛雪六音源试听《${title} - ${artist}》试听切片...`, '🎧');
+    }
+
+    function downloadLxSong(idx) {
+      const song = currentLxSearchResults[idx] || lxMockSongs[0];
+      showToast(`正在下载《${song.title}》FLAC 无损音频与 LRC 逐字歌词文件...`, '⬇️');
+      setTimeout(() => {
+        showToast(`🎉《${song.title} - ${song.artist}》FLAC 与歌词已下载至 Downloads 目录`, '💾');
+      }, 1000);
+    }
+
+    // ========================================================
+    // 一键训练处理流水线 (One-Click Training Pipeline)
+    // 1. 洛雪音源无损拉取 FLAC 与 LRC
+    // 2. HTDemucs 48kHz 人声与伴奏物理剥离
+    // 3. RMVPE 提取音高走势与干声音素特征向量
+    // 4. 注入本地播放列表与任务大厅
+    // ========================================================
+    let isTrainingInProgress = false;
+    function trainLxSong(idx) {
+      if (isTrainingInProgress) {
+        showToast('已有音频训练任务正在执行中，请稍候...', '⏳');
+        return;
+      }
+      const song = currentLxSearchResults[idx] || lxMockSongs[0];
+      isTrainingInProgress = true;
+
+      const wrap = document.getElementById('lxTrainProgressWrap');
+      const bar = document.getElementById('lxTrainProgressBar');
+      const lbl = document.getElementById('lxTrainProgressLabel');
+      const pct = document.getElementById('lxTrainPercent');
+
+      if (wrap) wrap.style.display = 'block';
+      if (bar) bar.style.width = '0%';
+      if (pct) pct.textContent = '0%';
+      if (lbl) lbl.textContent = `[1/4] 正在通过洛雪音源拉取《${song.title}》FLAC 无损音频与动态歌词...`;
+
+      showToast(`🚀 已启动《${song.title}》一键训练处理管线！`, '⚡');
+
+      // 阶段 1: 抓取与校验
+      setTimeout(() => {
+        if (bar) bar.style.width = '28%';
+        if (pct) pct.textContent = '28%';
+        if (lbl) lbl.textContent = `[2/4] 调用 HTDemucs 48kHz 神经声学模型分离伴奏与原唱人声轨...`;
+      }, 500);
+
+      // 阶段 2: HTDemucs 分离
+      setTimeout(() => {
+        if (bar) bar.style.width = '64%';
+        if (pct) pct.textContent = '64%';
+        if (lbl) lbl.textContent = `[3/4] 调用 RMVPE 算法提取 F0 旋律曲线与声线特征向量...`;
+      }, 1050);
+
+      // 阶段 3: RMVPE 提取与微调
+      setTimeout(() => {
+        if (bar) bar.style.width = '92%';
+        if (pct) pct.textContent = '92%';
+        if (lbl) lbl.textContent = `[4/4] 伴奏/干声/LRC 切片融合完毕，正在注入本地播放列表与任务库...`;
+      }, 1550);
+
+      // 阶段 4: 完成并注入歌曲列表
+      setTimeout(() => {
+        if (bar) bar.style.width = '100%';
+        if (pct) pct.textContent = '100%';
+        if (lbl) lbl.textContent = `训练处理圆满完成！《${song.title}》伴奏轨与 AI 改词分轨均已就绪！`;
+
+        setTimeout(() => {
+          if (wrap) wrap.style.display = 'none';
+          isTrainingInProgress = false;
+
+          // 注入左侧歌曲列表顶部
+          addSongToLeftPlaylist(song);
+
+          // 注入任务大厅表格
+          addTaskToTrainingTable(song.title);
+
+          closeModal('modalLxMusicStudio');
+          showToast(`🎉《${song.title}》一键训练成功！已自动加载到播放列表`, '✨');
+        }, 400);
+      }, 1950);
+    }
+
+    function addSongToLeftPlaylist(song) {
+      const container = document.getElementById('songListContainer');
+      if (!container) return;
+
+      document.querySelectorAll('.song-item-row').forEach(r => r.classList.remove('active'));
+
+      const newRow = document.createElement('div');
+      newRow.className = 'song-item-row active';
+      newRow.setAttribute('data-title', song.title);
+      newRow.onclick = function() {
+        selectSong(this, song.title, song.duration);
+      };
+      newRow.innerHTML = `
+        <div class="song-item-left">
+          <span class="song-item-title">${song.title}</span>
+          <span class="song-alt-badge active" title="洛雪音源一键训练完成，伴奏与改词轨已就绪">⚡ 洛雪训练</span>
+        </div>
+        <span class="song-group-tag" onclick="event.stopPropagation(); openSongMenu(this, '${song.title}')">流行</span>
+      `;
+
+      container.prepend(newRow);
+
+      activeSongName = song.title;
+      const dockTitle = document.getElementById('dockSongTitle');
+      const stageSong = document.getElementById('stageCurrentSong');
+      const dockTime = document.getElementById('dockTimeLabel');
+      if (dockTitle) dockTitle.textContent = song.title;
+      if (stageSong) stageSong.textContent = song.title;
+      if (dockTime) dockTime.textContent = '00:00 / ' + song.duration;
+    }
+
+    function addTaskToTrainingTable(songTitle) {
+      const tbody = document.querySelector('.tasks-table tbody');
+      if (!tbody) return;
+      const newTr = document.createElement('tr');
+      const randomId = '#' + Math.floor(25 + Math.random() * 20);
+      newTr.innerHTML = `
+        <td>${randomId}</td>
+        <td>lx_train_process</td>
+        <td>${songTitle}</td>
+        <td>
+          <div style="width: 120px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+            <div style="width: 100%; height: 100%; background: var(--glow-success);"></div>
+          </div>
+        </td>
+        <td><span class="status-badge success">已完成 100%</span></td>
+        <td>18s</td>
+        <td>
+          <button class="cat-pill" style="display: inline-flex; height: 26px; padding: 0 10px;" onclick="showToast('已载入《${songTitle}》伴奏', '🎵')">载入试听</button>
+        </td>
+      `;
+      tbody.prepend(newTr);
+    }
+
+    // ========================================================
+    // 自定义源管理配置交互 (Custom Sources Management)
+    // ========================================================
+    function openLxCustomSourceModal() {
+      const modal = document.getElementById('modalLxCustomSource');
+      if (modal) modal.classList.add('show');
+    }
+
+    function activateLxSource(srcKey) {
+      currentLxSource = srcKey;
+      document.querySelectorAll('.lx-source-card').forEach(card => card.classList.remove('active'));
+      const activeCard = document.getElementById('srcCard_' + srcKey);
+      if (activeCard) {
+        activeCard.classList.add('active');
+        const radio = activeCard.querySelector('input[type="radio"]');
+        if (radio) radio.checked = true;
+      }
+      const srcInfo = lxCustomSources[srcKey] || lxCustomSources['sixin'];
+      showToast(`已选中「${srcInfo.name.split('·')[0].trim()}」`, '⚙️');
+    }
+
+    function saveAndApplyCustomSource() {
+      const srcInfo = lxCustomSources[currentLxSource] || lxCustomSources['sixin'];
+      const cardState = document.getElementById('cardLxSourceState');
+      const notice = document.getElementById('lxSourceStatusNotice');
+
+      const shortName = currentLxSource === 'sixin' ? '六音源' : (currentLxSource === 'ikun' ? '爱坤源' : '本地源');
+      if (cardState) {
+        cardState.textContent = `⚙️ ${shortName} (正常)`;
+      }
+      if (notice) {
+        notice.textContent = `● ${shortName}自定义源已激活 (${srcInfo.ping}ms)`;
+      }
+      closeModal('modalLxCustomSource');
+      showToast(`已成功生效自定义音源配置：${srcInfo.name}`, '🎉');
+    }
+
+    function testCustomSourceConnectivity() {
+      showToast('正在向洛雪音源节点发送心跳握手与测速 Ping...', '⚡');
+      setTimeout(() => {
+        const ping1 = Math.floor(22 + Math.random() * 12);
+        const ping2 = Math.floor(38 + Math.random() * 18);
+        document.getElementById('ping_sixin').textContent = `${ping1}ms 极佳`;
+        document.getElementById('ping_ikun').textContent = `${ping2}ms 正常`;
+        showToast(`节点延迟测速完成：六音源 ${ping1}ms · 爱坤源 ${ping2}ms`, '🚀');
+      }, 600);
+    }
+
+    function importCustomSourceFromUrl() {
+      const input = document.getElementById('inputCustomSourceUrl');
+      const url = input ? input.value.trim() : '';
+      if (!url) {
+        showToast('请输入有效的自定义源脚本 URL 或本地路径', '⚠️');
+        return;
+      }
+      showToast('正在解析与校验自定义源 JavaScript 脚本签名...', '⏳');
+      setTimeout(() => {
+        showToast('🎉 自定义源脚本解析成功！包含 5 个音源驱动模块', '✨');
+        activateLxSource('local');
+      }, 800);
     }
 
     // 音乐创作模块交互
